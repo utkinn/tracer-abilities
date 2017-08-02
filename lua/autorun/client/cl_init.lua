@@ -46,7 +46,7 @@ canRecall = true
 
 TRANSPARENCY = 100
 
-recallSnapshots = {}
+--recallSnapshots = {}
 
 function blink()
 	if blinks > 0 and LocalPlayer():Alive() and not LocalPlayer():IsFrozen() then
@@ -58,15 +58,15 @@ function blink()
 end
 
 function recall()
-	if not IsValid(recallSnapshots[os.time()]) then
-		print("recallSnapshots[" .. os.time() .. "] is invalid")
-		return
-	end
+	-- if not IsValid(recallSnapshots[os.time()]) then
+		-- print("recallSnapshots[" .. os.time() .. "] is invalid")
+		-- return
+	-- end
 	if canRecall and LocalPlayer():Alive() and not LocalPlayer():IsFrozen() then
 		timer.Simple(12, function() canRecall = true end)
 		recallRestoreMoment = os.time() + 12
 		net.Start("recall")
-			net.WriteTable(recallSnapshots[os.time()])
+			--net.WriteTable(recallSnapshots[os.time()])
 		net.SendToServer()
 		canRecall = false
 	end

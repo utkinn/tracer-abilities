@@ -5,31 +5,51 @@ util.AddNetworkString( "recall" )
 
 BLINK_LENGHT = 367
 
-playersAngles = {}
+playerMoveAngles = {}
 
 -- hook.Add( "InitPostEntity", "setupAngleTables", function()
 	-- local players = player.GetHumans()
 	-- for k, v in pairs( players ) do
-		-- playersAngles[ v ] = nil
+		-- playerMoveAngles[ v ] = nil
 	-- end
 -- end )
 
 hook.Add( "PlayerDisconnected", "removeAngleTableEntry", function( player )
-	playersAngles[ player ] = nil
+	playerMoveAngles[ player ] = nil
 end )
 
 hook.Add( "Move", "retrieveMovementAngles", function( player, moveData )
-	playersAngles[ player ] = moveData:GetMoveAngles()
+	playerMoveAngles[ player ] = moveData:GetMoveAngles()
 end )
 
 function blink( player )
-	local aim = player:GetAimVector()
-	aim = aim * 367
-	while util.IsInWorld( aim ) or ents.FindInSphere( aim, 1 ) do	--Preventing blinking outside the world or inside another entity
-		aim = aim - player:GetAimVector()
+	local target = playerMoveAngles[ player ]:Forward()
+	if target.x == 0 and target.y == 0 then
+		target = player:GetAimVector()
 	end
-	aim.z = player:GetPos().z	--Restricting vertical movement
-	player:SetPos( aim )
+	target = target * 367
+	target.z = player:GetPos().z	--Restricting vertical movement
+	
+	local tr = util.TraceEntity({	--Trace and Tracer...
+		start = player:GetPos(),
+		endpos = target,
+		filter = function()	--Trace(r) passes through all entities
+			return false
+		end
+	}, player )
+	
+	if tr.Hit then
+		player:SetPos( tr.HitPos )
+	else
+		player:SetPos( target )
+	end
+	-- while util.IsInWorld( target ) or ents.FindInSphere( target, 1 ) do	--Preventing blinking outside the world or inside another entity
+		-- target = target - player:GetAimVector()
+	-- end
+	-- target = target - player:GetAimVector() * 32	--Guaranteed no-stuck 
+	-- 
+	
+	
 end
 
 net.Receive( "blink", function( length, player ) blink( player ) end )

@@ -43,47 +43,25 @@ end
 createFonts()
 hook.Add("InitPostEntity", "createFont", createFonts)
 
---Variables
-blinks = 3
-canRecall = true
-
---HUD transparency
 TRANSPARENCY = 255
 
+recallRestoreMoment = 0
+
 function blink()
-	if blinks > 0 and LocalPlayer():Alive() and not LocalPlayer():IsFrozen() then
-		timer.Start("restoreBlinks")	--Reset a cooldown timer
-		net.Start("blink")	--Send a blink request to server
-		net.SendToServer()
-		blinks = blinks - 1
-	end
+	net.Start("blink")
+	net.SendToServer()
 end
 
 function recall()
-	if canRecall and LocalPlayer():Alive() and not LocalPlayer():IsFrozen() then
-		canRecall = false	--Set cooldown
-		timer.Simple(12, function()
-			canRecall = true	--Regain ability after 12 seconds
-			surface.PlaySound("buttons/blip1.wav")	--Notify player about ability regain
-		end)
-		recallRestoreMoment = os.time() + 12	--Used in HUD to show cooldown time
-		net.Start("recall")	--Send a recall request to server
-		net.SendToServer()
-	end
+	recallRestoreMoment = os.time() + 13	--Used in HUD to show cooldown time
+	net.Start("recall")	--Send a recall request to server
+	net.SendToServer()
 end
 
 --Creating console commands
 concommand.Add("tracer_blink", blink, nil, "Zip horizontally through space in the direction you're moving.", FCVAR_DEMO)
 concommand.Add("tracer_recall", recall, nil, "Bound backward in time, returning your health, ammo and position on the map to precisely where they were a few seconds before.", FCVAR_DEMO)
 CreateClientConVar("tracer_callouts", 1, true, true, "Should your character say Tracer's phrases when you use abilities?") 
-
---Blink restore loop
-timer.Create("restoreBlinks", 2, 0, function()
-	if blinks ~= 3 then
-		blinks = blinks + 1
-		surface.PlaySound("buttons/blip1.wav")	--Notify user
-	end
-end)
 
 function drawIcon(icon, shouldBeRed, x, y)
 	surface.SetMaterial(icon)
@@ -101,6 +79,7 @@ hook.Add("HUDPaint", "drawIconBackground", function()	--Background rectangle
 end)
 
 hook.Add("HUDPaint", "drawBlinkIcon", function()
+	local blinks = LocalPlayer():GetNWInt("blinks")
 	drawIcon(materials.blink, blinks == 0, ScrW() * 0.95, ScrH() * 0.75)
 	surface.SetFont("Overwatch")
 	if blinks == 0 then
@@ -113,6 +92,7 @@ hook.Add("HUDPaint", "drawBlinkIcon", function()
 end)
 
 hook.Add("HUDPaint", "drawRecallIcon", function()
+	local canRecall = LocalPlayer():GetNWBool("canRecall")
 	drawIcon(materials.recall, not canRecall, ScrW() * 0.95, ScrH() * 0.85)
 	if not canRecall then
 		surface.SetFont("Overwatch 0.5x")
@@ -120,4 +100,8 @@ hook.Add("HUDPaint", "drawRecallIcon", function()
 		surface.SetTextPos(ScrW() * 0.93, ScrH() * 0.86)
 		surface.DrawText(recallRestoreMoment - os.time() + 1)
 	end
+end)
+
+net.Receive("blip", function()
+	surface.PlaySound("buttons/blip1.wav")	--Notify user
 end)

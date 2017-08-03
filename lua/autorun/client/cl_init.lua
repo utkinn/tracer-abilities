@@ -53,7 +53,7 @@ function blink()
 end
 
 function recall()
-	recallRestoreMoment = os.time() + 11	--Used in HUD to show cooldown time
+	recallRestoreMoment = os.time() + GetConVar("tracer_recall_cooldown"):GetInt() - 1	--Used in HUD to show cooldown time
 	net.Start("recall")	--Send a recall request to server
 	net.SendToServer()
 end

@@ -4,15 +4,11 @@ util.AddNetworkString("blink")
 util.AddNetworkString("recall")
 
 BLINK_LENGHT = 367
+snapshotTick = 0
 
 recallSnapshots = {}
 
--- hook.Add( "InitPostEntity", "setupAngleTables", function()
-	-- local players = player.GetHumans()
-	-- for k, v in pairs( players ) do
-		-- playerMoveAngles[ v ] = nil
-	-- end
--- end )
+TICK_RATE = 0.05
 
 function blink(player)
 	local playerAngles = player:EyeAngles()
@@ -49,30 +45,34 @@ function blink(player)
 end
 
 function recall(player)
-	MsgN( "----------------------------------------------------")
-	for k, v in SortedPairs(recallSnapshots) do
-		MsgN( "recallSnapshots[", k, "]:")
-		for k2, v2 in pairs(v) do
-			MsgN( "\trecallSnapshots[", k, "][", k2, "]:")
-			for k3, v3 in pairs(v2) do
-				MsgN( "\t\trecallSnapshots[", k, "][", k2, "][", k3, "] = ", v3)
-			end
-		end
-	end
-	MsgN( "----------------------------------------------------")
+	-- MsgN( "----------------------------------------------------")
+	-- for k, v in SortedPairs(recallSnapshots) do
+		-- MsgN( "recallSnapshots[", k, "]:")
+		-- for k2, v2 in pairs(v) do
+			-- MsgN( "\trecallSnapshots[", k, "][", k2, "]:")
+			-- for k3, v3 in pairs(v2) do
+				-- MsgN( "\t\trecallSnapshots[", k, "][", k2, "][", k3, "] = ", v3)
+			-- end
+		-- end
+	-- end
+	-- MsgN( "----------------------------------------------------")
 	
-	local currentTime = math.Round(os.clock(), 1)
+	--local currentTime = math.Round(os.clock(), 1)
 	--local targetTime = currentTime - 3
 	--MsgN("recallData = recallSnapshots[", targetTime, "][", player, "]")
-	local i = currentTime - 0.2
-	timer.Create( "recallEffect", 0.0417, 28, function()
-		i = i - 0.1
-		MsgN("trying to load recall snapshot, recallData = recallSnapshots[", i, "][", player, "]")
+	local i = snapshotTick - 1
+	player:GodEnable()
+	player:SetColor(Color(255, 255, 255, 0))
+	player:Lock()
+	player:EmitSound("recall.mp3")
+	timer.Create("recallEffect", 1.25 / (3 / TICK_RATE), 3 / TICK_RATE, function()
+		i = i - 1
+		--MsgN("trying to load recall snapshot, recallData = recallSnapshots[", i, "][", player, "]")
 		--if not IsValid(recallSnapshots[i]) then MsgN("failed to load a recall snapshot") return end
 		local recallData = recallSnapshots[i]
-		MsgN("recallSnapshots[", i, "] = ", recallSnapshots[i])
+		--MsgN("recallSnapshots[", i, "] = ", recallSnapshots[i])
 		local personalData = recallData[player]
-		MsgN("recallData[", player, "] = ", recallData[player])
+		--MsgN("recallData[", player, "] = ", recallData[player])
 		--local recallData = net.ReadTable()
 		player:SetHealth(personalData.health)
 		player:SetArmor(personalData.armor)
@@ -80,14 +80,25 @@ function recall(player)
 		player:SetAngles(personalData.angles)
 		player:Extinguish()
 	end)
+	timer.Simple(1.25, function()
+		player:GodDisable()
+		player:SetColor(Color(255, 255, 255, 255))
+		player:UnLock()
+	end)
 end
 
-hook.Add("InitPostEntity", "createRecallTimer", function()
-	timer.Create("saveRecallData", 0.1, 0, function()
-		local curTime = math.Round(os.clock(), 1)
-		recallSnapshots[curTime] = {}
+hook.Add("InitPostEntity", "createSnapshotTicker", function()
+	timer.Create("incrementTick", TICK_RATE, 0, function()
+		snapshotTick = snapshotTick + 1
+	end)
+end)
+
+hook.Add("InitPostEntity", "createRecallHook", function()
+	timer.Create("saveRecallData", TICK_RATE, 0, function()
+		--local curTime = math.Round(os.clock(), 1)
+		recallSnapshots[snapshotTick] = {}
 		for _, player in pairs(player.GetAll()) do
-			recallSnapshots[curTime][player] =
+			recallSnapshots[snapshotTick][player] =
 			{
 				health = player:Health(),
 				armor = player:Armor(),
@@ -95,11 +106,11 @@ hook.Add("InitPostEntity", "createRecallTimer", function()
 				angles = player:GetAngles()
 				--primaryAmmo = player:GetAmmoCount(player:GetActiveWeapon)
 			}
-			for i = 3, 5, 0.1 do	--Removing expired snapshots
-				table.remove(recallSnapshots, curTime - i)
-				MsgN("removed recall snapshot at recallSnapshots[", curTime - i, "]")
-			end
-			MsgN("created recall snapshot in recallSnapshots[", curTime, "][", player, "]")
+			-- for i = 350, 500 do	--Removing expired snapshots
+				-- table.remove(recallSnapshots, snapshotTick - i)
+				-- --MsgN("removed recall snapshot at recallSnapshots[", snapshotTick - i, "]")
+			-- end
+			--MsgN("created recall snapshot in recallSnapshots[", snapshotTick, "][", player, "]")
 		end
 	end)
 end)

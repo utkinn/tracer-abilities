@@ -44,7 +44,7 @@ hook.Add("InitPostEntity", "createFont", createFont)
 blinks = 3
 canRecall = true
 
-TRANSPARENCY = 100
+TRANSPARENCY = 255
 
 --recallSnapshots = {}
 
@@ -63,7 +63,7 @@ function recall()
 		-- return
 	-- end
 	if canRecall and LocalPlayer():Alive() and not LocalPlayer():IsFrozen() then
-		timer.Simple(12, function() canRecall = true end)
+		timer.Simple(12, function() canRecall = true; surface.PlaySound("buttons/blip1.wav") end)
 		recallRestoreMoment = os.time() + 12
 		net.Start("recall")
 			--net.WriteTable(recallSnapshots[os.time()])
@@ -76,26 +76,34 @@ concommand.Add("tracer_blink", blink, nil, "Zip horizontally through space in th
 concommand.Add("tracer_recall", recall, nil, "Bound backward in time, returning your health, ammo and position on the map to precisely where they were a few seconds before.", FCVAR_DEMO)
 
 timer.Create("restoreBlinks", 3, 0, function()
-	blinks = math.Clamp(blinks + 1, 0, 3)
+	if blinks ~= 3 then
+		blinks = blinks + 1
+		surface.PlaySound("buttons/blip1.wav")
+	end
 end)
 
 function drawIcon(icon, shouldBeRed, x, y)
 	surface.SetMaterial(icon)
 	if shouldBeRed then
-		surface.SetDrawColor(255, 0, 0, TRANSPARENCY)
+		surface.SetDrawColor(255, 48, 0, TRANSPARENCY)
 	else
-		surface.SetDrawColor(255, 255, 255, TRANSPARENCY)
+		surface.SetDrawColor(255, 160, 0, TRANSPARENCY)
 	end
 	surface.DrawTexturedRect(x, y, 50, 50)
 end
+
+hook.Add("HUDPaint", "drawIconBackground", function()
+	surface.SetDrawColor(0, 0, 0, 75)
+	surface.DrawRect(ScrW() * 0.92, ScrH() * 0.72, ScrW() * 0.075, ScrH() * 0.2)
+end)
 
 hook.Add("HUDPaint", "drawBlinkIcon", function()
 	drawIcon(materials.blink, blinks == 0, ScrW() * 0.95, ScrH() * 0.75)
 	surface.SetFont("Overwatch")
 	if blinks == 0 then
-		surface.SetTextColor(255, 0, 0, TRANSPARENCY)
+		surface.SetTextColor(255, 48, 0, TRANSPARENCY)
 	else
-		surface.SetTextColor(255, 255, 255, TRANSPARENCY)
+		surface.SetTextColor(255, 160, 0, TRANSPARENCY)
 	end
 	surface.SetTextPos(ScrW() * 0.93, ScrH() * 0.75)
 	surface.DrawText(blinks)
@@ -105,7 +113,7 @@ hook.Add("HUDPaint", "drawRecallIcon", function()
 	drawIcon(materials.recall, not canRecall, ScrW() * 0.95, ScrH() * 0.85)
 	if not canRecall then
 		surface.SetFont("Overwatch 0.5x")
-		surface.SetTextColor(255, 0, 0, TRANSPARENCY)
+		surface.SetTextColor(255, 48, 0, TRANSPARENCY)
 		surface.SetTextPos(ScrW() * 0.93, ScrH() * 0.86)
 		surface.DrawText(recallRestoreMoment - os.time() + 1)
 	end

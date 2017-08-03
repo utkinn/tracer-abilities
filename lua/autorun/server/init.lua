@@ -10,6 +10,12 @@ recallSnapshots = {}	--Table for storing all snapshots
 
 TICK_RATE = 0.05	--Smoothness of recall.
 
+CreaterConVar("tracer_blink_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow blinking to admins only.")
+CreaterConVar("tracer_recall_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow recalling to admins only.")
+CreaterConVar("tracer_blink_stack", 3, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Blink stack size.")
+CreaterConVar("tracer_blink_cooldown", 3, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of one blink in seconds.")
+CreaterConVar("tracer_recall_cooldown", 12, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of recall in seconds.")
+
 function blink(player)
 	local playerAngles = player:EyeAngles()
 	playerAngles.pitch = 0	--Restricting vertical movement

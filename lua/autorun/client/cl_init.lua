@@ -51,6 +51,11 @@ canRecall = true
 TRANSPARENCY = 255
 
 function blink()
+	if GetConVar("tracer_blink_adminonly"):GetBool() then
+			if not LocalPlayer():IsAdmin() then
+				return
+			end
+		end
 	if blinks > 0 and LocalPlayer():Alive() and not LocalPlayer():IsFrozen() then
 		timer.Start("restoreBlinks")	--Reset a cooldown timer
 		net.Start("blink")	--Send a blink request to server
@@ -61,6 +66,11 @@ end
 
 function recall()
 	if canRecall and LocalPlayer():Alive() and not LocalPlayer():IsFrozen() then
+		if GetConVar("tracer_recall_adminonly"):GetBool() then
+			if not LocalPlayer():IsAdmin() then
+				return
+			end
+		end
 		canRecall = false	--Set cooldown
 		timer.Simple(12, function()
 			canRecall = true	--Regain ability after 12 seconds

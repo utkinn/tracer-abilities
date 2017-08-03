@@ -1,4 +1,6 @@
 AddCSLuaFile("client/cl_init.lua")
+AddCSLuaFile("effects/blink.lua")
+AddCSLuaFile("effects/recall.lua")
 
 util.AddNetworkString("blink")
 util.AddNetworkString("recall")
@@ -10,6 +12,8 @@ snapshotTick = 0	--Number of current snapshot
 recallSnapshots = {}	--Table for storing all snapshots
 
 TICK_RATE = 0.05	--Smoothness of recall.
+
+--shinyMaterial = Material("models/shiny")
 
 CreateConVar("tracer_blink_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow blinking to admins only.")
 CreateConVar("tracer_recall_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow recalling to admins only.")
@@ -32,11 +36,31 @@ function restoreBlinks(player)
 	end
 end
 
+function emitBlinkEffect(player)
+	local effectData = EffectData()
+	effectData:SetEntity(player)
+	util.Effect("blink", effectData)
+end
+
+function emitRecallEffect(player)
+	local effectData = EffectData()
+	effectData:SetOrigin(player:GetPos() + Vector(0, 0, 40))
+	util.Effect("recall", effectData)
+end
+
+function emitReversedRecallEffect(player)
+	local effectData = EffectData()
+	effectData:SetOrigin(player:GetPos() + Vector(0, 0, 40))
+	util.Effect("reversedRecall", effectData)
+end
+
 function blink(player)
 	if GetConVar("tracer_blink_adminonly"):GetBool() then
 		if not player:IsAdmin() then return end
 	end
 	if player:GetNWInt("blinks") > 0 and player:Alive() and not player:IsFrozen() then
+		emitBlinkEffect(player)
+		
 		if not timer.Exists("player_" .. player:UserID()) then 
 			timer.Create("restoreBlinks_" .. player:UserID(), 2, 0, function() restoreBlinks(player) end)	--Reset a cooldown timer
 		end
@@ -74,12 +98,19 @@ function recall(player)
 		if not player:IsAdmin() then return end
 	end
 	if player:GetNWBool("canRecall") and player:Alive() and not player:IsFrozen() then
+		emitRecallEffect(player)
+		
 		local i = snapshotTick - 1
 		
+		local oldMaterial = player:GetMaterial()
+		
 		player:GodEnable()
-		player:SetColor(Color(255, 255, 255, 0))
+		player:SetRenderMode(RENDERMODE_TRANSALPHA)
+		player:SetColor(Color(0, 0, 0, 0))
 		player:Lock()
 		player:EmitSound("recall.mp3")
+		--recallingNow = true
+		player:DrawWorldModel(false)
 		
 		timer.Create("recallEffect", 1.25 / (3 / TICK_RATE), 3 / TICK_RATE, function()
 			i = i - 1
@@ -93,8 +124,12 @@ function recall(player)
 		end)
 		timer.Simple(1.25, function()
 			player:GodDisable()
+			player:SetRenderMode(RENDERMODE_NORMAL)
 			player:SetColor(Color(255, 255, 255, 255))
 			player:UnLock()
+			--recallingNow = false
+			player:DrawWorldModel(true)
+			emitRecallEffect(player)
 		end)
 		if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.5 then
 			timer.Simple(1.5, function() player:EmitSound("callouts/recall/" .. math.random(4) .. ".wav") end)

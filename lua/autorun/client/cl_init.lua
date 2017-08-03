@@ -53,7 +53,7 @@ function blink()
 end
 
 function recall()
-	recallRestoreMoment = os.time() + 13	--Used in HUD to show cooldown time
+	recallRestoreMoment = os.time() + 11	--Used in HUD to show cooldown time
 	net.Start("recall")	--Send a recall request to server
 	net.SendToServer()
 end
@@ -68,7 +68,7 @@ function drawIcon(icon, shouldBeRed, x, y)
 	if shouldBeRed then
 		surface.SetDrawColor(255, 48, 0, TRANSPARENCY)	--Red
 	else
-		surface.SetDrawColor(255, 160, 0, TRANSPARENCY)	--Yellow
+		surface.SetDrawColor(255, 208, 64, TRANSPARENCY)	--Yellow
 	end
 	surface.DrawTexturedRect(x, y, 50, 50)
 end
@@ -85,7 +85,7 @@ hook.Add("HUDPaint", "drawBlinkIcon", function()
 	if blinks == 0 then
 		surface.SetTextColor(255, 48, 0, TRANSPARENCY)
 	else
-		surface.SetTextColor(255, 160, 0, TRANSPARENCY)
+		surface.SetTextColor(255, 208, 64, TRANSPARENCY)
 	end
 	surface.SetTextPos(ScrW() * 0.93, ScrH() * 0.75)
 	surface.DrawText(blinks)

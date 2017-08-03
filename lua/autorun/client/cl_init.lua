@@ -78,7 +78,7 @@ concommand.Add("tracer_recall", recall, nil, "Bound backward in time, returning 
 CreateClientConVar("tracer_callouts", 1, true, true, "Should your character say Tracer's phrases when you use abilities?") 
 
 --Blink restore loop
-timer.Create("restoreBlinks", 3, 0, function()
+timer.Create("restoreBlinks", 2, 0, function()
 	if blinks ~= 3 then
 		blinks = blinks + 1
 		surface.PlaySound("buttons/blip1.wav")	--Notify user

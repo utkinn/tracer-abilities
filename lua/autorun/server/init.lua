@@ -10,6 +10,12 @@ recallSnapshots = {}	--Table for storing all snapshots
 
 TICK_RATE = 0.05	--Smoothness of recall.
 
+CreateConVar("tracer_blink_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow blinking to admins only.")
+CreateConVar("tracer_recall_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow recalling to admins only.")
+CreateConVar("tracer_blink_stack", 3, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Blink stack size.")
+CreateConVar("tracer_blink_cooldown", 3, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of one blink in seconds.")
+CreateConVar("tracer_recall_cooldown", 12, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of recall in seconds.")
+
 function blink(player)
 	local playerAngles = player:EyeAngles()
 	playerAngles.pitch = 0	--Restricting vertical movement
@@ -33,8 +39,8 @@ function blink(player)
 	
 	player:SetPos(tr.Hit and tr.HitPos or blinkDirection)
 	player:EmitSound("blink" .. math.random(3) .. ".wav")
-	if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.3 then
-		timer.Simple(0.7, function() player:EmitSound("callouts/blink/" .. math.random(2) .. ".wav") end)
+	if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.33 then
+		timer.Simple(0.45, function() player:EmitSound("callouts/blink/" .. math.random(2) .. ".wav") end)
 	end
 end
 
@@ -61,7 +67,7 @@ function recall(player)
 		player:SetColor(Color(255, 255, 255, 255))
 		player:UnLock()
 	end)
-	if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.5 then
+	if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.8 then
 		timer.Simple(1.5, function() player:EmitSound("callouts/recall/" .. math.random(4) .. ".wav") end)
 	end
 end

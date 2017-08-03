@@ -1,9 +1,11 @@
+--HUD materials setup
 materials = {
 	blink = Material("blink.png", "smooth"),
 	recall = Material("recall.png", "smooth")
 }
 
-function createFont()
+--Creating HUD font
+function createFonts()
 	surface.CreateFont("Overwatch", {
 		font = "bignoodletoo",
 		size = 50,
@@ -38,61 +40,61 @@ function createFont()
 	})
 end
 
-createFont()
-hook.Add("InitPostEntity", "createFont", createFont)
+createFonts()
+hook.Add("InitPostEntity", "createFont", createFonts)
 
+--Variables
 blinks = 3
 canRecall = true
 
+--HUD transparency
 TRANSPARENCY = 255
-
---recallSnapshots = {}
 
 function blink()
 	if blinks > 0 and LocalPlayer():Alive() and not LocalPlayer():IsFrozen() then
-		timer.Start("restoreBlinks")
-		net.Start("blink")
+		timer.Start("restoreBlinks")	--Reset a cooldown timer
+		net.Start("blink")	--Send a blink request to server
 		net.SendToServer()
 		blinks = blinks - 1
 	end
 end
 
 function recall()
-	-- if not IsValid(recallSnapshots[os.time()]) then
-		-- print("recallSnapshots[" .. os.time() .. "] is invalid")
-		-- return
-	-- end
 	if canRecall and LocalPlayer():Alive() and not LocalPlayer():IsFrozen() then
-		timer.Simple(12, function() canRecall = true; surface.PlaySound("buttons/blip1.wav") end)
-		recallRestoreMoment = os.time() + 12
-		net.Start("recall")
-			--net.WriteTable(recallSnapshots[os.time()])
+		canRecall = false	--Set cooldown
+		timer.Simple(12, function()
+			canRecall = true	--Regain ability after 12 seconds
+			surface.PlaySound("buttons/blip1.wav")	--Notify player about ability regain
+		end)
+		recallRestoreMoment = os.time() + 12	--Used in HUD to show cooldown time
+		net.Start("recall")	--Send a recall request to server
 		net.SendToServer()
-		canRecall = false
 	end
 end
 
+--Creating console commands
 concommand.Add("tracer_blink", blink, nil, "Zip horizontally through space in the direction you're moving.", FCVAR_DEMO)
 concommand.Add("tracer_recall", recall, nil, "Bound backward in time, returning your health, ammo and position on the map to precisely where they were a few seconds before.", FCVAR_DEMO)
 
+--Blink restore loop
 timer.Create("restoreBlinks", 3, 0, function()
 	if blinks ~= 3 then
 		blinks = blinks + 1
-		surface.PlaySound("buttons/blip1.wav")
+		surface.PlaySound("buttons/blip1.wav")	--Notify user
 	end
 end)
 
 function drawIcon(icon, shouldBeRed, x, y)
 	surface.SetMaterial(icon)
 	if shouldBeRed then
-		surface.SetDrawColor(255, 48, 0, TRANSPARENCY)
+		surface.SetDrawColor(255, 48, 0, TRANSPARENCY)	--Red
 	else
-		surface.SetDrawColor(255, 160, 0, TRANSPARENCY)
+		surface.SetDrawColor(255, 160, 0, TRANSPARENCY)	--Yellow
 	end
 	surface.DrawTexturedRect(x, y, 50, 50)
 end
 
-hook.Add("HUDPaint", "drawIconBackground", function()
+hook.Add("HUDPaint", "drawIconBackground", function()	--Background rectangle
 	surface.SetDrawColor(0, 0, 0, 75)
 	surface.DrawRect(ScrW() * 0.92, ScrH() * 0.72, ScrW() * 0.075, ScrH() * 0.2)
 end)

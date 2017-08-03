@@ -32,7 +32,10 @@ function blink(player)
 	}, player)
 	
 	player:SetPos(tr.Hit and tr.HitPos or blinkDirection)
-	player:EmitSound("blink" .. math.random(1, 3) .. ".wav")
+	player:EmitSound("blink" .. math.random(3) .. ".wav")
+	if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.3 then
+		timer.Simple(0.7, function() player:EmitSound("callouts/blink/" .. math.random(2) .. ".wav") end)
+	end
 end
 
 function recall(player)
@@ -58,6 +61,9 @@ function recall(player)
 		player:SetColor(Color(255, 255, 255, 255))
 		player:UnLock()
 	end)
+	if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.5 then
+		timer.Simple(1.5, function() player:EmitSound("callouts/recall/" .. math.random(4) .. ".wav") end)
+	end
 end
 
 hook.Add("InitPostEntity", "createSnapshotTicker", function()

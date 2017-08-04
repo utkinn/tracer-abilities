@@ -7,7 +7,7 @@ materials = {
 --Creating HUD font
 function createFonts()
 	surface.CreateFont("Overwatch", {
-		font = "bignoodletoo",
+		font = "BigNoodleTooOblique",
 		size = 50,
 		weight = 500,
 		blursize = 0,
@@ -23,7 +23,7 @@ function createFonts()
 		outline = false
 	})
 	surface.CreateFont("Overwatch 0.5x", {
-		font = "bignoodletoo",
+		font = "BigNoodleTooOblique",
 		size = 25,
 		weight = 500,
 		blursize = 0,

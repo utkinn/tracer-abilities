@@ -92,14 +92,10 @@ function blink(player)
 		tr, blinkDirection = calculateBlinkPosition(player, 0)
 		
 		if tr.Hit then
-			print("hit")
-			local currentTestedPitch = 1
-			print("currentTestedPitch = " .. currentTestedPitch)
+			local currentTestedPitch = -1
 			while tr.Hit and currentTestedPitch >= -45 do
 				tr, blinkDirection = calculateBlinkPosition(player, currentTestedPitch)
-				MsgN("tr.Hit = ", tr.Hit, ", tr.HitPos = ", tr.HitPos, ", blinkDirection = ", blinkDirection)
 				currentTestedPitch = currentTestedPitch - 1
-				print("currentTestedPitch = " .. currentTestedPitch)
 			end
 			player:SetPos(tr.Hit and calculateBlinkPosition(player, 0).HitPos or tr.HitPos)
 		else

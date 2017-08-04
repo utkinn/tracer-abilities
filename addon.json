@@ -1,5 +1,5 @@
 {
 	"title"		:	"Overwatch Tracer: Abilities",
 	"type"		:	"weapon",
-	"ignore"	:	[".git/*"]
+	"ignore"	:	[".git/*", "README.md"]
 }

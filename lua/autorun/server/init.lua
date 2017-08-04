@@ -18,16 +18,16 @@ TICK_RATE = 0.05	--Smoothness of recall.
 CreateConVar("tracer_blink_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow blinking to admins only.")
 CreateConVar("tracer_recall_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow recalling to admins only.")
 CreateConVar("tracer_blink_stack", 3, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Blink stack size.")
-CreateConVar("tracer_blink_cooldown", 3, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of one blink in seconds.")
-CreateConVar("tracer_recall_cooldown", 12, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of recall in seconds.")
+CreateConVar("tracer_blink_cooldown", 2, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of one blink in seconds.")
+CreateConVar("tracer_recall_cooldown", 11, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of recall in seconds.")
 
 hook.Add( "PlayerSpawn", "resetAbilities", function(player)
-	player:SetNWInt("blinks", 3)
+	player:SetNWInt("blinks", GetConVar("tracer_blink_stack"):GetInt())
 	player:SetNWBool("canRecall", true)
 end)
 
 function restoreBlinks(player)
-	if player:GetNWInt("blinks") ~= 3 then
+	if player:GetNWInt("blinks") < GetConVar("tracer_blink_stack"):GetInt() then
 		player:SetNWInt("blinks", player:GetNWInt("blinks") + 1)
 		net.Start("blip")
 		net.Send(player)
@@ -103,7 +103,7 @@ function blink(player)
 		emitBlinkEffect(player)
 		
 		if not timer.Exists("player_" .. player:UserID()) then 
-			timer.Create("restoreBlinks_" .. player:UserID(), 2, 0, function() restoreBlinks(player) end)	--Reset a cooldown timer
+			timer.Create("restoreBlinks_" .. player:UserID(), GetConVar("tracer_blink_cooldown"):GetInt(), 0, function() restoreBlinks(player) end)	--Reset a cooldown timer
 		end
 		local playerAngles = player:EyeAngles()
 		playerAngles.pitch = 0	--Restricting vertical movement
@@ -175,12 +175,12 @@ function recall(player)
 			player:DrawWorldModel(true)
 			emitRecallEffect(player)
 		end)
-		if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.5 then
+		if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.75 then
 			timer.Simple(1.5, function() player:EmitSound("callouts/recall/" .. math.random(4) .. ".wav") end)
 		end
 		
 		player:SetNWBool("canRecall", false)
-		timer.Simple(12, function()
+		timer.Simple(GetConVar("tracer_recall_cooldown"):GetInt(), function()
 			player:SetNWBool("canRecall", true)	--Regain ability after 12 seconds
 			net.Start("blip")
 			net.Send(player)

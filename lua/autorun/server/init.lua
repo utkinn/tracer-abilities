@@ -54,6 +54,30 @@ function emitReversedRecallEffect(player)
 	util.Effect("reversedRecall", effectData)
 end
 
+function calculateBlinkPosition(player, pitch)
+	local playerAngles = player:EyeAngles()
+	playerAngles.pitch = pitch
+	
+	local blinkDirection = playerAngles:Forward()
+	
+	--Direction blinks
+	if player:KeyDown( IN_MOVELEFT ) then blinkDirection = -playerAngles:Right() end
+	if player:KeyDown( IN_MOVERIGHT ) then blinkDirection = playerAngles:Right() end
+	if player:KeyDown( IN_BACK ) then blinkDirection = -playerAngles:Forward() end
+	
+	blinkDirection = player:GetPos() + blinkDirection * BLINK_LENGHT
+	
+	local tr = util.TraceEntity({	--Trace and Tracer...
+		start = player:GetPos() + Vector(0, 0, 10),
+		endpos = blinkDirection + Vector(0, 0, 10),
+		filter = function()	--Trace(r) passes through all entities
+			return false
+		end
+	}, player)
+	
+	return tr, blinkDirection
+end
+
 function blink(player)
 	if GetConVar("tracer_blink_adminonly"):GetBool() then
 		if not player:IsAdmin() then return end
@@ -61,30 +85,23 @@ function blink(player)
 	if player:GetNWInt("blinks") > 0 and player:Alive() and not player:IsFrozen() then
 		emitBlinkEffect(player)
 		
-		if not timer.Exists("player_" .. player:UserID()) then 
+		if not timer.Exists("player_" .. player:UserID()) then
 			timer.Create("restoreBlinks_" .. player:UserID(), GetConVar("tracer_blink_cooldown"):GetInt(), 0, function() restoreBlinks(player) end)	--Reset a cooldown timer
 		end
-		local playerAngles = player:EyeAngles()
-		playerAngles.pitch = 0	--Restricting vertical movement
-	
-		local blinkDirection = playerAngles:Forward()
-	
-		--Direction blinks
-		if player:KeyDown( IN_MOVELEFT ) then blinkDirection = -playerAngles:Right() end
-		if player:KeyDown( IN_MOVERIGHT ) then blinkDirection = playerAngles:Right() end
-		if player:KeyDown( IN_BACK ) then blinkDirection = -playerAngles:Forward() end
-	
-		blinkDirection = player:GetPos() + blinkDirection * BLINK_LENGHT
 		
-		local tr = util.TraceEntity({	--Trace and Tracer...
-			start = player:GetPos() + Vector(0, 0, 10),
-			endpos = blinkDirection + Vector(0, 0, 10),
-			filter = function()	--Trace(r) passes through all entities
-				return false
+		tr, blinkDirection = calculateBlinkPosition(player, 0)
+		
+		if tr.Hit then
+			local currentTestedPitch = -1
+			while tr.Hit and currentTestedPitch >= -45 do
+				tr, blinkDirection = calculateBlinkPosition(player, currentTestedPitch)
+				currentTestedPitch = currentTestedPitch - 1
 			end
-		}, player)
+			player:SetPos(tr.Hit and calculateBlinkPosition(player, 0).HitPos or tr.HitPos)
+		else
+			player:SetPos(blinkDirection)
+		end
 		
-		player:SetPos(tr.Hit and tr.HitPos or blinkDirection)
 		player:EmitSound("blink" .. math.random(3) .. ".wav")
 		if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.33 then
 			timer.Simple(0.55, function() player:EmitSound("callouts/blink/" .. math.random(2) .. ".wav") end)

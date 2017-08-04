@@ -46,14 +46,16 @@ hook.Add("InitPostEntity", "createFont", createFonts)
 TRANSPARENCY = 255
 
 recallRestoreMoment = 0
-
+	
 function blink()
 	net.Start("blink")
 	net.SendToServer()
 end
 
 function recall()
-	recallRestoreMoment = os.time() + GetConVar("tracer_recall_cooldown"):GetInt() - 1	--Used in HUD to show cooldown time
+	if LocalPlayer():GetNWBool("canRecall") then
+		recallRestoreMoment = os.time() + GetConVar("tracer_recall_cooldown"):GetInt() - 1	--Used in HUD to show cooldown time
+	end
 	net.Start("recall")	--Send a recall request to server
 	net.SendToServer()
 end

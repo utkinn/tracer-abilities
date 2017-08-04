@@ -13,18 +13,22 @@ recallSnapshots = {}	--Table for storing all snapshots
 
 TICK_RATE = 0.05	--Smoothness of recall.
 
---shinyMaterial = Material("models/shiny")
-
 CreateConVar("tracer_blink_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow blinking to admins only.")
 CreateConVar("tracer_recall_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow recalling to admins only.")
 CreateConVar("tracer_blink_stack", 3, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Blink stack size.")
 CreateConVar("tracer_blink_cooldown", 2, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of one blink in seconds.")
 CreateConVar("tracer_recall_cooldown", 11, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of recall in seconds.")
 
-hook.Add( "PlayerSpawn", "resetAbilities", function(player)
+hook.Add("PlayerSpawn", "resetAbilities", function(player)
 	player:SetNWInt("blinks", GetConVar("tracer_blink_stack"):GetInt())
 	player:SetNWBool("canRecall", true)
+	player:SetNWBool("readyForRecall", false)
+	timer.Simple(3.1, function() player:SetNWBool("readyForRecall", true) end)
 end)
+
+-- hook.Add("postPlayerDeath", "resetRecallSnapshots", function()
+	
+-- end)
 
 function restoreBlinks(player)
 	if player:GetNWInt("blinks") < GetConVar("tracer_blink_stack"):GetInt() then
@@ -114,7 +118,7 @@ function recall(player)
 	if GetConVar("tracer_recall_adminonly"):GetBool() then
 		if not player:IsAdmin() then return end
 	end
-	if player:GetNWBool("canRecall") and player:Alive() and not player:IsFrozen() then
+	if player:GetNWBool("canRecall") and player:Alive() and not player:IsFrozen() and player:GetNWBool("readyForRecall") then
 		emitRecallEffect(player)
 		
 		local i = snapshotTick - 1

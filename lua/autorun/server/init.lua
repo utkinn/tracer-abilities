@@ -69,17 +69,34 @@ function calculateBlinkPosition(player, pitch)
 	if player:KeyDown( IN_MOVERIGHT ) then blinkDirection = playerAngles:Right() end
 	if player:KeyDown( IN_BACK ) then blinkDirection = -playerAngles:Forward() end
 	
-	blinkDirection = player:GetPos() + blinkDirection * BLINK_LENGHT
+	blinkPosition = player:GetPos() + blinkDirection * BLINK_LENGHT
 	
 	local tr = util.TraceEntity({	--Trace and Tracer...
-		start = player:GetPos() + Vector(0, 0, 10),
-		endpos = blinkDirection + Vector(0, 0, 10),
+		start = player:GetPos() --[[+ Vector(0, 0, 10)--]],
+		endpos = blinkPosition --[[+ Vector(0, 0, 10)--]],
 		filter = function()	--Trace(r) passes through all entities
 			return false
 		end
 	}, player)
 	
-	return tr, blinkDirection
+	return tr, blinkPosition, blinkDirection
+end
+
+function executeBlink(player, position, direction)
+	local blinkAnim = {}
+	blinkAnim.reverse = player:GetPos() - direction * 5	--Rolling back for 1 frame
+	blinkAnim[1] = player:GetPos() + direction * BLINK_LENGHT * 0.2
+	blinkAnim[2] = player:GetPos() + direction * BLINK_LENGHT * 0.4
+	blinkAnim[3] = player:GetPos() + direction * BLINK_LENGHT * 0.6
+	blinkAnim[4] = player:GetPos() + direction * BLINK_LENGHT * 0.8
+	blinkAnim.full = position
+	
+	player:SetPos(blinkAnim.reverse)
+	timer.Simple(0.02, function() player:SetPos(blinkAnim[1]) end)
+	timer.Simple(0.03, function() player:SetPos(blinkAnim[2]) end)
+	timer.Simple(0.04, function() player:SetPos(blinkAnim[3]) end)
+	timer.Simple(0.05, function() player:SetPos(blinkAnim[4]) end)
+	timer.Simple(0.06, function() player:SetPos(blinkAnim.full) end)
 end
 
 function blink(player)
@@ -93,22 +110,22 @@ function blink(player)
 			timer.Create("restoreBlinks_" .. player:UserID(), GetConVar("tracer_blink_cooldown"):GetInt(), 0, function() restoreBlinks(player) end)	--Reset a cooldown timer
 		end
 		
-		tr, blinkDirection = calculateBlinkPosition(player, 0)
+		tr, blinkPosition, blinkDirection = calculateBlinkPosition(player, 0)
 		
 		if tr.Hit then
 			local currentTestedPitch = -1
 			while tr.Hit and currentTestedPitch >= -45 do
-				tr, blinkDirection = calculateBlinkPosition(player, currentTestedPitch)
+				tr, blinkPosition = calculateBlinkPosition(player, currentTestedPitch)
 				currentTestedPitch = currentTestedPitch - 1
 			end
-			player:SetPos(tr.Hit and calculateBlinkPosition(player, 0).HitPos or tr.HitPos)
+			executeBlink(player, tr.Hit and calculateBlinkPosition(player, 0).HitPos or tr.HitPos, blinkDirection)
 		else
-			player:SetPos(blinkDirection)
+			executeBlink(player, blinkPosition, blinkDirection)
 		end
 		
 		player:EmitSound("blink" .. math.random(3) .. ".wav")
-		if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.33 then
-			timer.Simple(0.55, function() player:EmitSound("callouts/blink/" .. math.random(2) .. ".wav") end)
+		if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.2 then
+			timer.Simple(0.33, function() player:EmitSound("callouts/blink/" .. math.random(2) .. ".wav") end)
 		end
 		player:SetNWInt("blinks", player:GetNWInt("blinks") - 1)
 	end
@@ -128,9 +145,8 @@ function recall(player)
 		player:GodEnable()
 		player:SetRenderMode(RENDERMODE_TRANSALPHA)
 		player:SetColor(Color(0, 0, 0, 0))
-		player:Lock()
+		--player:Lock()
 		player:EmitSound("recall.mp3")
-		--recallingNow = true
 		player:DrawWorldModel(false)
 		
 		timer.Create("recallEffect", 1.25 / (3 / TICK_RATE), 3 / TICK_RATE, function()
@@ -140,15 +156,14 @@ function recall(player)
 			player:SetHealth(recallData.health)
 			player:SetArmor(recallData.armor)
 			player:SetPos(recallData.position)
-			player:SetAngles(recallData.angles)
+			player:SetEyeAngles(recallData.angles)
 			player:Extinguish()
 		end)
 		timer.Simple(1.25, function()
 			player:GodDisable()
 			player:SetRenderMode(RENDERMODE_NORMAL)
 			player:SetColor(Color(255, 255, 255, 255))
-			player:UnLock()
-			--recallingNow = false
+			--player:UnLock()
 			player:DrawWorldModel(true)
 			emitRecallEffect(player)
 		end)
@@ -180,7 +195,7 @@ hook.Add("InitPostEntity", "createRecallHook", function()
 				health = player:Health(),
 				armor = player:Armor(),
 				position = player:GetPos(),
-				angles = player:GetAngles()
+				angles = player:EyeAngles()
 				--primaryAmmo = player:GetAmmoCount(player:GetActiveWeapon)
 			}
 			-- for i = 350, 500 do	--Removing expired snapshots

@@ -1,9 +1,11 @@
 AddCSLuaFile("client/cl_init.lua")
 AddCSLuaFile("effects/blink.lua")
 AddCSLuaFile("effects/recall.lua")
+AddCSLuaFile("entities/pulseBomb.lua")
 
 util.AddNetworkString("blink")
 util.AddNetworkString("recall")
+util.AddNetworkString("throwBomb")
 util.AddNetworkString("blip")
 
 BLINK_LENGHT = 367	--~7 meters
@@ -18,6 +20,8 @@ CreateConVar("tracer_recall_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "A
 CreateConVar("tracer_blink_stack", 3, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Blink stack size.")
 CreateConVar("tracer_blink_cooldown", 2, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of one blink in seconds.")
 CreateConVar("tracer_recall_cooldown", 11, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of recall in seconds.")
+CreateConVar("tracer_bomb_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow using pulse bomb to admins only.")
+CreateConVar("tracer_bomb_charge_multiplier", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Multiplier of the pulse bomb charge speed.")
 
 hook.Add("PlayerSpawn", "resetAbilities", function(player)
 	player:SetNWInt("blinks", GetConVar("tracer_blink_stack"):GetInt())
@@ -26,9 +30,15 @@ hook.Add("PlayerSpawn", "resetAbilities", function(player)
 	timer.Simple(3.1, function() player:SetNWBool("readyForRecall", true) end)
 end)
 
--- hook.Add("postPlayerDeath", "resetRecallSnapshots", function()
+hook.Add("EntityTakeDamage", "increaseBombCharge", function(_, dmgInfo)
+	local dmg = dmgInfo:GetDamage()
+	local attacker = dmgInfo:GetAttacker()
 	
--- end)
+	if attacker:IsPlayer() then
+		if not attacker:IsAdmin() and GetConVar("tracer_bomb_adminonly"):GetBool() then return end
+		attacker:SetNWInt("bombCharge", math.Clamp(attacker:GetNWInt("bombCharge", 0) + dmg / 10 * GetConVar("tracer_bomb_charge_multiplier"):GetInt(), 0, 100))
+	end
+end)
 
 function restoreBlinks(player)
 	if player:GetNWInt("blinks") < GetConVar("tracer_blink_stack"):GetInt() then
@@ -180,6 +190,28 @@ function recall(player)
 	end
 end
 
+function throwBomb(player)
+	if GetConVar("tracer_bomb_adminonly"):GetBool() then
+		if not player:IsAdmin() then return end
+	end
+	if player:GetNWInt("bombCharge") >= 100 and player:Alive() then
+		player:SetNWInt("bombCharge", 0)
+	
+		local bomb = ents.Create("pulseBomb")
+		
+		bomb:SetPos(player:GetPos() + Vector(0, 0, 50))
+		bomb:SetOwner(player)
+		
+		bomb:Spawn()
+		local phys = bomb:GetPhysicsObject()
+		phys:ApplyForceCenter(player:EyeAngles():Forward() * 3000 + Vector(0, 0, 750))
+		
+		if player:GetInfoNum("tracer_callouts", 0) then
+			player:EmitSound("callouts/bomb/1.wav")
+		end
+	end
+end
+
 hook.Add("InitPostEntity", "createSnapshotTicker", function()
 	timer.Create("incrementTick", TICK_RATE, 0, function()
 		snapshotTick = snapshotTick + 1
@@ -206,5 +238,14 @@ hook.Add("InitPostEntity", "createRecallHook", function()
 	end)
 end)
 
+hook.Add("InitPostEntity", "staticBombCharge", function()
+	timer.Create("staticBombCharge", 2, 0, function()
+		for _, player in pairs(player.GetAll()) do
+			player:SetNWInt("bombCharge", math.Clamp(player:GetNWInt("bombCharge", 0) + GetConVar("tracer_bomb_charge_multiplier"):GetInt(), 0, 100))
+		end
+	end)
+end)
+
 net.Receive("blink", function(length, player) blink(player) end)
 net.Receive("recall", function(length, player) recall(player) end)
+net.Receive("throwBomb", function(length, player) throwBomb(player) end)

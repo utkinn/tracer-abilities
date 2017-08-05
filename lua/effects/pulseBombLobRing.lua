@@ -1,22 +1,20 @@
-local material = Material("models/props_combine/stasisshield_sheet")
+local material = Material("bombBall.png")
 
 function EFFECT:Init(data)
-	local color = Color(192, 255, 255)
-	
 	self:SetModel("models/effects/combineball.mdl")
+	self:SetRenderMode(RENDERMODE_TRANSALPHA)
 	self:SetMaterial(material)
 	self:SetPos(data:GetOrigin())
 	self:SetAngles(LocalPlayer():EyeAngles())
 	
-	self:SetColor(color)
-	self.Scale = 4
-	self.Duration = 0.25
+	self.Scale = 5
+	self.Duration = 0.5
 	self.Begin = CurTime()
 	self:SetModelScale(self.Scale)
 	
 	local light = DynamicLight(self:EntIndex())
 	light.Pos = self:GetPos()
-	light.r, light.g, light.b = color.r, color.g, color.b
+	light.r, light.g, light.b = 80, 157, 255
 	light.brightness = 2
 	light.Decay = 1000
 	light.Size = 256
@@ -29,10 +27,7 @@ function EFFECT:Think()
 end
 
 function EFFECT:Render()
-	--local scale = (self.Duration - CurTime() + self.Begin) / self.Duration * self.Scale
-	--local scale = CurTime() - self.Begin - self.Duration * self.Scale
-	local scale = (self.Duration - CurTime() + self.Begin) * self.Duration * self.Scale
-	print(scale)
+	local scale = (self.Duration - CurTime() + self.Begin) / self.Duration * self.Scale
 	self:SetModelScale(scale)
 	self:SetAngles(LocalPlayer():EyeAngles())
 	self:DrawModel()

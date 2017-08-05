@@ -3,15 +3,45 @@ AddCSLuaFile("effects/blink.lua")
 AddCSLuaFile("effects/recall.lua")
 AddCSLuaFile("entities/pulseBomb.lua")
 
+--TODO: Replace math.random() on random sound selection to table.random or something like that
+
 util.AddNetworkString("blink")
 util.AddNetworkString("recall")
 util.AddNetworkString("throwBomb")
 util.AddNetworkString("blip")
+util.AddNetworkString("bombStickedToEnemy")
 
 BLINK_LENGHT = 367	--~7 meters
 snapshotTick = 0	--Number of current snapshot
 
 recallSnapshots = {}	--Table for storing all snapshots
+
+sounds = 
+{
+	blink =
+	{
+		[1] = Sound("blink/1.wav"),
+		[2] = Sound("blink/2.wav"),
+		[3] = Sound("blink/3.wav"),
+	},
+	recall = Sound("recall.mp3")
+}
+
+callouts =
+{
+	blink =
+	{
+		[1] = Sound("callouts/blink/1.wav")
+		[2] = Sound("callouts/blink/2.wav")
+	},
+	recall = 
+	{
+		[1] = Sound("callouts/recall/1.wav")
+		[2] = Sound("callouts/recall/2.wav")
+		[3] = Sound("callouts/recall/3.wav")
+		[4] = Sound("callouts/recall/4.wav")
+	}
+}
 
 TICK_RATE = 0.05	--Smoothness of recall.
 
@@ -207,8 +237,16 @@ function throwBomb(player)
 		phys:ApplyForceCenter(player:EyeAngles():Forward() * 3000 + Vector(0, 0, 1500))
 		
 		if player:GetInfoNum("tracer_callouts", 0) then
-			player:EmitSound("callouts/bomb/1.wav")
+			--player:EmitSound("callouts/bomb/1.wav")	--TODO
 		end
+	end
+end
+
+function playBombCallout(player, stickedToEnemy)
+	if stickedToEnemy then
+		--TODO
+	else
+		--TODO
 	end
 end
 
@@ -249,3 +287,4 @@ end)
 net.Receive("blink", function(length, player) blink(player) end)
 net.Receive("recall", function(length, player) recall(player) end)
 net.Receive("throwBomb", function(length, player) throwBomb(player) end)
+net.Receive("bombStickedToEnemy", function(length, player) playBombCallout(player, net.ReadBool()) end)

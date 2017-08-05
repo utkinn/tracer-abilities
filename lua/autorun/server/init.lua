@@ -46,7 +46,7 @@ function restoreBlinks(player)
 		net.Start("blip")
 		net.Send(player)
 	else
-		timer.Remove("player_" .. player:UserID())
+		timer.Remove("restoreBlinks_" .. player:UserID())
 	end
 end
 
@@ -116,7 +116,7 @@ function blink(player)
 	if player:GetNWInt("blinks") > 0 and player:Alive() and not player:IsFrozen() then
 		emitBlinkEffect(player)
 		
-		if not timer.Exists("player_" .. player:UserID()) then
+		if not timer.Exists("restoreBlinks_" .. player:UserID()) then
 			timer.Create("restoreBlinks_" .. player:UserID(), GetConVar("tracer_blink_cooldown"):GetInt(), 0, function() restoreBlinks(player) end)	--Reset a cooldown timer
 		end
 		
@@ -204,7 +204,7 @@ function throwBomb(player)
 		
 		bomb:Spawn()
 		local phys = bomb:GetPhysicsObject()
-		phys:ApplyForceCenter(player:EyeAngles():Forward() * 3000 + Vector(0, 0, 750))
+		phys:ApplyForceCenter(player:EyeAngles():Forward() * 3000 + Vector(0, 0, 1500))
 		
 		if player:GetInfoNum("tracer_callouts", 0) then
 			player:EmitSound("callouts/bomb/1.wav")

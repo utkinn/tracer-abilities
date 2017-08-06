@@ -99,7 +99,7 @@ function executeBlink(player, position, direction)
 	timer.Simple(0.06, function() player:SetPos(blinkAnim.full) end)
 end
 
-function slopeOrWall()
+function slopeOrWall(player)
 	local currentTestedPitch = -1
 	while tr.Hit and currentTestedPitch >= -45 do
 		tr, blinkPosition = calculateBlinkPosition(player, currentTestedPitch)
@@ -121,7 +121,7 @@ function blink(player)
 		tr, blinkPosition, blinkDirection = calculateBlinkPosition(player, 0)
 		
 		if tr.Hit then
-			slopeOrWall()
+			slopeOrWall(player)
 			executeBlink(player, tr.Hit and calculateBlinkPosition(player, 0).HitPos or tr.HitPos, blinkDirection)
 		else
 			executeBlink(player, blinkPosition, blinkDirection)

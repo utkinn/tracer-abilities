@@ -31,14 +31,14 @@ callouts =
 {
 	blink =
 	{
-		[1] = Sound("callouts/blink/1.wav")
+		[1] = Sound("callouts/blink/1.wav"),
 		[2] = Sound("callouts/blink/2.wav")
 	},
 	recall = 
 	{
-		[1] = Sound("callouts/recall/1.wav")
-		[2] = Sound("callouts/recall/2.wav")
-		[3] = Sound("callouts/recall/3.wav")
+		[1] = Sound("callouts/recall/1.wav"),
+		[2] = Sound("callouts/recall/2.wav"),
+		[3] = Sound("callouts/recall/3.wav"),
 		[4] = Sound("callouts/recall/4.wav")
 	}
 }
@@ -163,9 +163,9 @@ function blink(player)
 			executeBlink(player, blinkPosition, blinkDirection)
 		end
 		
-		player:EmitSound("blink" .. math.random(3) .. ".wav")
+		player:EmitSound(sounds.blink[math.random(#sounds.blink)])
 		if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.2 then
-			timer.Simple(0.33, function() player:EmitSound("callouts/blink/" .. math.random(2) .. ".wav") end)
+			timer.Simple(0.33, function() player:EmitSound(callouts.blink[math.random(#callouts.blink)]) end)
 		end
 		player:SetNWInt("blinks", player:GetNWInt("blinks") - 1)
 	end
@@ -176,6 +176,8 @@ function recall(player)
 		if not player:IsAdmin() then return end
 	end
 	if player:GetNWBool("canRecall") and player:Alive() and not player:IsFrozen() and player:GetNWBool("readyForRecall") then
+		player:SetNWBool("readyForRecall", false)
+		
 		emitRecallEffect(player)
 		
 		local i = snapshotTick - 1
@@ -186,7 +188,7 @@ function recall(player)
 		player:SetRenderMode(RENDERMODE_TRANSALPHA)
 		player:SetColor(Color(0, 0, 0, 0))
 		--player:Lock()
-		player:EmitSound("recall.mp3")
+		player:EmitSound(sounds.recall)
 		player:DrawWorldModel(false)
 		
 		timer.Create("recallEffect", 1.25 / (3 / TICK_RATE), 3 / TICK_RATE, function()
@@ -206,12 +208,20 @@ function recall(player)
 			--player:UnLock()
 			player:DrawWorldModel(true)
 			emitRecallEffect(player)
+			player:SetNWBool("readyForRecall", true)
+			player:SetNWBool("canRecall", false)
+			
+			--Such an ugly workaround
+			player:SetNWInt("recallRestoreTime", GetConVar("tracer_recall_cooldown"):GetInt() - 2)
+			timer.Create("recallRestore_" .. player:UserID(), 1, GetConVar("tracer_recall_cooldown"):GetInt(), function()
+				player:SetNWInt("recallRestoreTime", player:GetNWInt("recallRestoreTime") - 1)
+			end)
 		end)
+		
 		if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.75 then
-			timer.Simple(1.5, function() player:EmitSound("callouts/recall/" .. math.random(4) .. ".wav") end)
+			timer.Simple(1.5, function() player:EmitSound(callouts.recall[math.random(#callouts.recall)]) end)
 		end
 		
-		player:SetNWBool("canRecall", false)
 		timer.Simple(GetConVar("tracer_recall_cooldown"):GetInt(), function()
 			player:SetNWBool("canRecall", true)	--Regain ability after 12 seconds
 			net.Start("blip")

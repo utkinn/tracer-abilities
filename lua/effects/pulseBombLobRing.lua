@@ -1,13 +1,10 @@
-local material = Material("bombBall.png")
-
 function EFFECT:Init(data)
 	self:SetModel("models/effects/combineball.mdl")
 	self:SetRenderMode(RENDERMODE_TRANSALPHA)
-	self:SetMaterial(material)
 	self:SetPos(data:GetOrigin())
 	self:SetAngles(LocalPlayer():EyeAngles())
 	
-	self.Scale = 5
+	self.Scale = 20
 	self.Duration = 0.5
 	self.Begin = CurTime()
 	self:SetModelScale(self.Scale)
@@ -19,6 +16,17 @@ function EFFECT:Init(data)
 	light.Decay = 1000
 	light.Size = 256
 	light.DieTime = CurTime() + self.Duration
+	
+	-- if CLIENT then
+		-- CreateMaterial("pulseBombLobRing", "VertexLitGeneric",
+		-- {
+			-- ["$basetexture"] = "bombBall",
+			-- ["$model"] = 1
+			-- --["$alpha"] = 0.7
+		-- })
+	-- end
+	
+	-- self:SetMaterial("!pulseBombLobRing", true)
 end
 
 function EFFECT:Think()

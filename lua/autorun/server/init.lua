@@ -9,7 +9,7 @@ util.AddNetworkString("blink")
 util.AddNetworkString("recall")
 util.AddNetworkString("throwBomb")
 util.AddNetworkString("blip")
-util.AddNetworkString("bombStickedToEnemy")
+util.AddNetworkString("bombStuckToEnemy")
 
 BLINK_LENGHT = 367	--~7 meters
 snapshotTick = 0	--Number of current snapshot
@@ -40,6 +40,23 @@ callouts =
 		[2] = Sound("callouts/recall/2.wav"),
 		[3] = Sound("callouts/recall/3.wav"),
 		[4] = Sound("callouts/recall/4.wav")
+	}, 
+	pulseBomb =
+	{
+		stuck =
+		{
+			[1] = Sound("callouts/pulseBomb/stuck/1.ogg"),
+			[2] = Sound("callouts/pulseBomb/stuck/2.ogg"),
+			[3] = Sound("callouts/pulseBomb/stuck/3.ogg"),
+			[4] = Sound("callouts/pulseBomb/stuck/4.ogg")
+		},
+		notStuck =
+		{
+			[1] = Sound("callouts/pulseBomb/notStuck/1.ogg"),
+			[2] = Sound("callouts/pulseBomb/notStuck/2.ogg"),
+			[3] = Sound("callouts/pulseBomb/notStuck/3.ogg"),
+			[4] = Sound("callouts/pulseBomb/notStuck/4.ogg")
+		}
 	}
 }
 
@@ -195,6 +212,7 @@ function recall(player)
 			i = i - 1
 			local recallData = recallSnapshots[i][player]
 			
+			if recallData == nil then return end
 			player:SetHealth(recallData.health)
 			player:SetArmor(recallData.armor)
 			player:SetPos(recallData.position)
@@ -246,17 +264,22 @@ function throwBomb(player)
 		local phys = bomb:GetPhysicsObject()
 		phys:ApplyForceCenter(player:EyeAngles():Forward() * 3000 + Vector(0, 0, 1500))
 		
-		if player:GetInfoNum("tracer_callouts", 0) then
-			--player:EmitSound("callouts/bomb/1.wav")	--TODO
-		end
+		bomb:NetworkVarNotify("Stuck", function(entity, varName, _, value)
+			playBombCallout(entity:GetOwner(), value)
+		end)
 	end
 end
 
-function playBombCallout(player, stickedToEnemy)
-	if stickedToEnemy then
-		--TODO
+function playBombCallout(player, stuckToEnemy)
+	print("yeh")
+	if stuckToEnemy then
+		if player:GetInfoNum("tracer_callouts", 0) then
+			player:EmitSound(callouts.pulseBomb.stuck[math.random(#callouts.pulseBomb.stuck)])
+		end
 	else
-		--TODO
+		if player:GetInfoNum("tracer_callouts", 0) then
+			player:EmitSound(callouts.pulseBomb.notStuck[math.random(#callouts.pulseBomb.notStuck)])
+		end
 	end
 end
 
@@ -297,4 +320,3 @@ end)
 net.Receive("blink", function(length, player) blink(player) end)
 net.Receive("recall", function(length, player) recall(player) end)
 net.Receive("throwBomb", function(length, player) throwBomb(player) end)
-net.Receive("bombStickedToEnemy", function(length, player) playBombCallout(player, net.ReadBool()) end)

@@ -5,6 +5,7 @@ include("shared.lua")
 
 function ENT:SetupDataTables()
 	self:NetworkVar("Bool", 0, "Collided")
+	self:NetworkVar("Bool", 1, "Stuck")
 end
 
 function ENT:Initialize()
@@ -24,15 +25,13 @@ function ENT:PhysicsCollide(data, collidedPhysObject)
 		self:SetCollided(true)
 		self:SetAngles(data.HitNormal:Angle() + Angle(-90, 0, 0))
 		local hitEnt = data.HitEntity
-		net.Start("bombStickedToEnemy")
-		if hitEnt:IsWorld() --[[or hitEnt:IsNPC() or hitEnt:IsPlayer()--]] then
+		if hitEnt:IsWorld() then
 			self:GetPhysicsObject():EnableMotion(false)
-			net.WriteBool(false)
+			self:SetStuck(false)
 		else
 			self:SetParent(hitEnt)
-			net.WriteBool(true)
+			self:SetStuck(true)
 		end
-		net.Send(self:GetOwner())
 		local effectData = EffectData()
 		effectData:SetOrigin(self:GetPos())
 		util.Effect("pulseBombLobRing", effectData)

@@ -4,14 +4,16 @@ function EFFECT:Init(data)
 	self:SetPos(data:GetOrigin())
 	self:SetAngles(LocalPlayer():EyeAngles())
 	
-	self.Scale = 20
+	self.Color = Color(80, 157, 255, 178.5)
+	self.Scale = 15
 	self.Duration = 0.5
 	self.Begin = CurTime()
 	self:SetModelScale(self.Scale)
+	self:SetColor(self.Color)
 	
 	local light = DynamicLight(self:EntIndex())
 	light.Pos = self:GetPos()
-	light.r, light.g, light.b = 80, 157, 255
+	light.r, light.g, light.b = self.Color.r, self.Color.g, self.Color.b 
 	light.brightness = 2
 	light.Decay = 1000
 	light.Size = 256

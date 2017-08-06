@@ -140,6 +140,7 @@ function recall(player)
 		if not player:IsAdmin() then return end
 	end
 	if player:GetNWBool("canRecall") and player:Alive() and not player:IsFrozen() and player:GetNWBool("readyForRecall") then
+		player:SetNWBool("readyToRecall", false)
 		emitRecallEffect(player)
 		
 		local i = snapshotTick - 1
@@ -170,7 +171,15 @@ function recall(player)
 			--player:UnLock()
 			player:DrawWorldModel(true)
 			emitRecallEffect(player)
+			player:SetNWBool("readyToRecall", false)
 		end)
+		
+		--Such an ugly workaround
+		player:SetNWInt("recallRestoreTime", GetConVar("tracer_recall_cooldown"):GetInt() - 2)
+		timer.Create("recallRestore_" .. player:UserID(), 1, GetConVar("tracer_recall_cooldown"):GetInt(), function()
+			player:SetNWInt("recallRestoreTime", player:GetNWInt("recallRestoreTime") - 1)
+		end)
+		
 		if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.75 then
 			timer.Simple(1.5, function() player:EmitSound("callouts/recall/" .. math.random(4) .. ".wav") end)
 		end

@@ -53,9 +53,6 @@ function blink()
 end
 
 function recall()
-	if LocalPlayer():GetNWBool("canRecall") then
-		recallRestoreMoment = os.time() + GetConVar("tracer_recall_cooldown"):GetInt() - 1	--Used in HUD to show cooldown time
-	end
 	net.Start("recall")	--Send a recall request to server
 	net.SendToServer()
 end
@@ -109,7 +106,7 @@ hook.Add("HUDPaint", "drawRecallIcon", function()
 			surface.SetFont("Overwatch 0.5x")
 			surface.SetTextColor(255, 48, 0, TRANSPARENCY)
 			surface.SetTextPos(ScrW() * 0.93, ScrH() * 0.86)
-			surface.DrawText(recallRestoreMoment - os.time() + 1)
+			surface.DrawText(LocalPlayer():GetNWInt("recallRestoreTime") + 1)
 		end
 	end
 end)

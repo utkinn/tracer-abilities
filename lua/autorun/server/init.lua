@@ -271,7 +271,6 @@ function throwBomb(player)
 end
 
 function playBombCallout(player, stuckToEnemy)
-	print("yeh")
 	if stuckToEnemy then
 		if player:GetInfoNum("tracer_callouts", 0) then
 			player:EmitSound(callouts.pulseBomb.stuck[math.random(#callouts.pulseBomb.stuck)])

@@ -45,17 +45,17 @@ callouts =
 	{
 		stuck =
 		{
-			[1] = Sound("callouts/pulseBomb/stuck/1.wav"),
-			[2] = Sound("callouts/pulseBomb/stuck/2.wav"),
-			[3] = Sound("callouts/pulseBomb/stuck/3.wav"),
-			[4] = Sound("callouts/pulseBomb/stuck/4.wav")
+			[1] = Sound("callouts/pulsebomb/stuck/1.wav"),
+			[2] = Sound("callouts/pulsebomb/stuck/2.wav"),
+			[3] = Sound("callouts/pulsebomb/stuck/3.wav"),
+			[4] = Sound("callouts/pulsebomb/stuck/4.wav")
 		},
 		notStuck =
 		{
-			[1] = Sound("callouts/pulseBomb/notStuck/1.wav"),
-			[2] = Sound("callouts/pulseBomb/notStuck/2.wav"),
-			[3] = Sound("callouts/pulseBomb/notStuck/3.wav"),
-			[4] = Sound("callouts/pulseBomb/notStuck/4.wav")
+			[1] = Sound("callouts/pulsebomb/notstuck/1.wav"),
+			[2] = Sound("callouts/pulsebomb/notstuck/2.wav"),
+			[3] = Sound("callouts/pulsebomb/notstuck/3.wav"),
+			[4] = Sound("callouts/pulsebomb/notstuck/4.wav")
 		}
 	}
 }

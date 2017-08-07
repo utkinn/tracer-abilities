@@ -74,6 +74,7 @@ hook.Add("PlayerSpawn", "resetAbilities", function(player)
 	player:SetNWInt("blinks", GetConVar("tracer_blink_stack"):GetInt())
 	player:SetNWBool("canRecall", true)
 	player:SetNWBool("readyForRecall", false)
+	player:SetNWBool("ultimateNotified", false)
 	timer.Simple(3.1, function() player:SetNWBool("readyForRecall", true) end)
 end)
 
@@ -84,6 +85,11 @@ hook.Add("EntityTakeDamage", "increaseBombCharge", function(_, dmgInfo)
 	if attacker:IsPlayer() then
 		if not attacker:IsAdmin() and GetConVar("tracer_bomb_adminonly"):GetBool() then return end
 		attacker:SetNWInt("bombCharge", math.Clamp(attacker:GetNWInt("bombCharge", 0) + dmg / 10 * GetConVar("tracer_bomb_charge_multiplier"):GetInt(), 0, 100))
+	end
+	
+	if attacker:GetNWInt("bombCharge") == 100 and not attacker:GetNWBool("ultimateNotified") and attacker:GetInfoNum("tracer_callouts", 0) then
+		attacker:EmitSound("callouts/pulsebomb/ready/" .. math.random(2) .. ".wav")
+		attacker:SetNWBool("ultimateNotified", true)
 	end
 end)
 
@@ -254,6 +260,7 @@ function throwBomb(player)
 	end
 	if player:GetNWInt("bombCharge") >= 100 and player:Alive() then
 		player:SetNWInt("bombCharge", 0)
+		player:SetNWBool("ultimateNotified", false)
 	
 		local bomb = ents.Create("pulseBomb")
 		
@@ -271,14 +278,11 @@ function throwBomb(player)
 end
 
 function playBombCallout(player, stuckToEnemy)
+	if not player:GetInfoNum("tracer_callouts", 0) then return end
 	if stuckToEnemy then
-		if player:GetInfoNum("tracer_callouts", 0) then
-			player:EmitSound(callouts.pulseBomb.stuck[math.random(#callouts.pulseBomb.stuck)])
-		end
+		player:EmitSound(callouts.pulseBomb.stuck[math.random(#callouts.pulseBomb.stuck)])
 	else
-		if player:GetInfoNum("tracer_callouts", 0) then
-			player:EmitSound(callouts.pulseBomb.notStuck[math.random(#callouts.pulseBomb.notStuck)])
-		end
+		player:EmitSound(callouts.pulseBomb.notStuck[math.random(#callouts.pulseBomb.notStuck)])
 	end
 end
 
@@ -312,6 +316,10 @@ hook.Add("InitPostEntity", "staticBombCharge", function()
 	timer.Create("staticBombCharge", 2, 0, function()
 		for _, player in pairs(player.GetAll()) do
 			player:SetNWInt("bombCharge", math.Clamp(player:GetNWInt("bombCharge", 0) + GetConVar("tracer_bomb_charge_multiplier"):GetInt(), 0, 100))
+			if player:GetNWInt("bombCharge") == 100 and not player:GetNWBool("ultimateNotified") and player:GetInfoNum("tracer_callouts", 0) then
+				player:EmitSound("callouts/pulsebomb/ready/" .. math.random(2) .. ".wav")
+				player:SetNWBool("ultimateNotified", true)
+			end
 		end
 	end)
 end)

@@ -316,7 +316,7 @@ hook.Add("InitPostEntity", "staticBombCharge", function()
 	timer.Create("staticBombCharge", 2, 0, function()
 		for _, player in pairs(player.GetAll()) do
 			player:SetNWInt("bombCharge", math.Clamp(player:GetNWInt("bombCharge", 0) + GetConVar("tracer_bomb_charge_multiplier"):GetInt(), 0, 100))
-			if player:GetNWInt("bombCharge") == 100 and not player:GetNWBool("ultimateNotified") and player:GetInfoNum("tracer_callouts", 0) then
+			if player:GetNWInt("bombCharge") == 100 and not player:GetNWBool("ultimateNotified") and player:GetInfoNum("tracer_callouts") then
 				player:EmitSound("callouts/pulsebomb/ready/" .. math.random(2) .. ".wav")
 				player:SetNWBool("ultimateNotified", true)
 			end

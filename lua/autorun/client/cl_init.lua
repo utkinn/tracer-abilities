@@ -1,12 +1,15 @@
 --HUD materials setup
-materials = {
+materials =
+{
 	blink = Material("blink.png", "smooth"),
-	recall = Material("recall.png", "smooth")
+	recall = Material("recall.png", "smooth"),
+	bomb = Material("bomb.png", "smooth")
 }
 
 --Creating HUD font
 function createFonts()
-	surface.CreateFont("Overwatch", {
+	surface.CreateFont("Overwatch",
+	{
 		font = "BigNoodleTooOblique",
 		size = 50,
 		weight = 500,
@@ -22,7 +25,8 @@ function createFonts()
 		additive = false,
 		outline = false
 	})
-	surface.CreateFont("Overwatch 0.5x", {
+	surface.CreateFont("Overwatch 0.5x",
+	{
 		font = "BigNoodleTooOblique",
 		size = 25,
 		weight = 500,
@@ -44,8 +48,6 @@ createFonts()
 hook.Add("InitPostEntity", "createFont", createFonts)
 
 TRANSPARENCY = 255
-
-recallRestoreMoment = 0
 	
 function blink()
 	net.Start("blink")
@@ -57,9 +59,15 @@ function recall()
 	net.SendToServer()
 end
 
+function throwBomb()
+	net.Start("throwBomb")
+	net.SendToServer()
+end
+
 --Creating console commands
 concommand.Add("tracer_blink", blink, nil, "Zip horizontally through space in the direction you're moving.", FCVAR_DEMO)
 concommand.Add("tracer_recall", recall, nil, "Bound backward in time, returning your health, ammo and position on the map to precisely where they were a few seconds before.", FCVAR_DEMO)
+concommand.Add("tracer_throwbomb", throwBomb, nil, "Lob a large bomb that adheres to any surface or unfortunate opponent it lands on.", FCVAR_DEMO)
 CreateClientConVar("tracer_callouts", 1, true, true, "Should your character say Tracer's phrases when you use abilities?")
 CreateClientConVar("tracer_hud", 1, true, false, "Enable the abilities HUD.")
 CreateClientConVar("tracer_notification_blips", 1, true, false, "Enable ability restore notification sound.")
@@ -79,21 +87,21 @@ end
 hook.Add("HUDPaint", "drawIconBackground", function()	--Background rectangle
 	if GetConVar("tracer_hud"):GetBool() then
 		surface.SetDrawColor(0, 0, 0, 75)
-		surface.DrawRect(ScrW() * 0.92, ScrH() * 0.72, ScrW() * 0.075, ScrH() * 0.2)
+		surface.DrawRect(ScrW() * 0.91, ScrH() * 0.62, ScrW() * 0.085, ScrH() * 0.28)
 	end
 end)
 
 hook.Add("HUDPaint", "drawBlinkIcon", function()
 	if GetConVar("tracer_hud"):GetBool() then
 		local blinks = LocalPlayer():GetNWInt("blinks")
-		drawIcon(materials.blink, blinks == 0, ScrW() * 0.95, ScrH() * 0.75)
+		drawIcon(materials.blink, blinks == 0, ScrW() * 0.95, ScrH() * 0.65)
 		surface.SetFont("Overwatch")
 		if blinks == 0 then
 			surface.SetTextColor(255, 48, 0, TRANSPARENCY)
 		else
 			surface.SetTextColor(255, 208, 64, TRANSPARENCY)
 		end
-		surface.SetTextPos(ScrW() * 0.93, ScrH() * 0.75)
+		surface.SetTextPos(ScrW() * 0.93, ScrH() * 0.65)
 		surface.DrawText(blinks)
 	end
 end)
@@ -101,13 +109,23 @@ end)
 hook.Add("HUDPaint", "drawRecallIcon", function()
 	if GetConVar("tracer_hud"):GetBool() then
 		local canRecall = LocalPlayer():GetNWBool("canRecall")
-		drawIcon(materials.recall, not canRecall, ScrW() * 0.95, ScrH() * 0.85)
+		drawIcon(materials.recall, not canRecall, ScrW() * 0.95, ScrH() * 0.75)
 		if not canRecall then
 			surface.SetFont("Overwatch 0.5x")
 			surface.SetTextColor(255, 48, 0, TRANSPARENCY)
-			surface.SetTextPos(ScrW() * 0.93, ScrH() * 0.86)
-			surface.DrawText(LocalPlayer():GetNWInt("recallRestoreTime") + 1)
+			surface.SetTextPos(ScrW() * 0.93, ScrH() * 0.76)
+			surface.DrawText(LocalPlayer():GetNWInt("recallRestoreTime"))
 		end
+	end
+end)
+
+hook.Add("HUDPaint", "drawBombIcon", function()
+	if GetConVar("tracer_hud"):GetBool() then
+		drawIcon(materials.bomb, false, ScrW() * 0.95, ScrH() * 0.83)
+		surface.SetFont("Overwatch")
+		surface.SetTextColor(255, 208, 64, TRANSPARENCY)
+		surface.SetTextPos(ScrW() * 0.91, ScrH() * 0.83)
+		surface.DrawText(math.Round(LocalPlayer():GetNWInt("bombCharge", 0)) .. "%")
 	end
 end)
 
@@ -146,6 +164,12 @@ hook.Add("PopulateToolMenu", "populateTracerAbilitiesSettings", function()
 			
 			form:NumberWang("Recall cooldown", "tracer_recall_cooldown", 0, 100)
 			form:ControlHelp("Cooldown time of recall.")
+			
+			form:CheckBox("Pulse Bomb for admins only", "tracer_bomb_adminonly")
+			form:ControlHelp("Allow using pulse bombs to admins only.")
+			
+			form:NumSlider("Pulse Bomb charge multiplier", "tracer_bomb_charge_multiplier", 0, 100)
+			form:ControlHelp("Multiplier of the pulse bomb charge speed.")
 		else
 			form:Help("You must have admin privilegies to change these settings.")
 		end

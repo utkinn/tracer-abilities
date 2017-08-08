@@ -1,0 +1,11 @@
+ENT.Base = "base_gmodentity"
+ENT.Type = "anim"
+ENT.Category = "Overwatch"
+ENT.PrintName = "Drunk Pulse Bomb"
+ENT.Author = "Protocs"
+ENT.Contact = "Workshop Addon page"
+ENT.Purpose = "Blow up scums from enemy team"
+ENT.Instructions = "Do not use"
+ENT.RenderGroup = RENDERGROUP_OPAQUE
+ENT.Spawnable = true
+ENT.AdminOnly = true

@@ -1,17 +1,20 @@
-AddCSLuaFile("client/cl_init.lua")
-AddCSLuaFile("effects/blink.lua")
-AddCSLuaFile("effects/recall.lua")
-AddCSLuaFile("entities/pulseBomb.lua")
+-- AddCSLuaFile("autorun/client/cl_init.lua")
+-- AddCSLuaFile("autorun/effects/blink.lua")
+-- AddCSLuaFile("autorun/effects/recall.lua")
+-- AddCSLuaFile("autorun/entities/pulseBomb.lua")
+AddCSLuaFile("tracerAbilities_shared.lua")
 
---TODO: Replace math.random() on random sound selection to table.random or something like that
+include("tracerAbilities_shared.lua")
 
 util.AddNetworkString("blink")
 util.AddNetworkString("recall")
 util.AddNetworkString("throwBomb")
 util.AddNetworkString("blip")
-util.AddNetworkString("bombStuckToEnemy")
+util.AddNetworkString("tracerAbilitiesConVarChanged")
+util.AddNetworkString("replicateConVars")
 
 BLINK_LENGHT = 367	--~7 meters
+
 snapshotTick = 0	--Number of current snapshot
 
 recallSnapshots = {}	--Table for storing all snapshots
@@ -56,6 +59,11 @@ callouts =
 			[2] = Sound("callouts/pulsebomb/notstuck/2.wav"),
 			[3] = Sound("callouts/pulsebomb/notstuck/3.wav"),
 			[4] = Sound("callouts/pulsebomb/notstuck/4.wav")
+		},
+		ready =
+		{
+			[1] = Sound("callouts/pulsebomb/ready/1.wav"),
+			[2] = Sound("callouts/pulsebomb/ready/2.wav")
 		}
 	}
 }
@@ -65,10 +73,21 @@ TICK_RATE = 0.05	--Smoothness of recall.
 CreateConVar("tracer_blink_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow blinking to admins only.")
 CreateConVar("tracer_recall_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow recalling to admins only.")
 CreateConVar("tracer_blink_stack", 3, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Blink stack size.")
-CreateConVar("tracer_blink_cooldown", 2, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of one blink in seconds.")
-CreateConVar("tracer_recall_cooldown", 11, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of recall in seconds.")
+CreateConVar("tracer_blink_cooldown", 3, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of one blink in seconds.")
+CreateConVar("tracer_recall_cooldown", 12, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of recall in seconds.")
 CreateConVar("tracer_bomb_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow using pulse bomb to admins only.")
 CreateConVar("tracer_bomb_charge_multiplier", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Multiplier of the pulse bomb charge speed.")
+
+hook.Add("PlayerInitialSpawn", "sendConVarValues", function(player)
+	local values = {}
+	for _, cvar in pairs(conVars) do
+		table.insert(values, cvar:GetInt())
+	end
+	
+	net.Start("replicateConVars")
+		net.WriteTable(values)
+	net.Send(player)
+end)
 
 hook.Add("PlayerSpawn", "resetAbilities", function(player)
 	player:SetNWInt("blinks", GetConVar("tracer_blink_stack"):GetInt())
@@ -78,26 +97,28 @@ hook.Add("PlayerSpawn", "resetAbilities", function(player)
 	timer.Simple(3.1, function() player:SetNWBool("readyForRecall", true) end)
 end)
 
+function increaseBombCharge(player, increase)
+	if not player:IsAdmin() and GetConVar("tracer_bomb_adminonly"):GetBool() then return end
+	player:SetNWInt("bombCharge", math.Clamp(player:GetNWInt("bombCharge", 0) + increase * GetConVar("tracer_bomb_charge_multiplier"):GetInt(), 0, 100))
+	if player:GetNWInt("bombCharge") == 100 and not player:GetNWBool("ultimateNotified") and player:GetInfoNum("tracer_callouts") then
+		player:EmitSound(sounds.pulseBomb.ready[math.random(#sounds.pulseBomb.ready)])
+		player:SetNWBool("ultimateNotified", true)
+	end
+end
+
 hook.Add("EntityTakeDamage", "increaseBombCharge", function(_, dmgInfo)
 	local dmg = dmgInfo:GetDamage()
 	local attacker = dmgInfo:GetAttacker()
 	
 	if attacker:IsPlayer() then
-		if not attacker:IsAdmin() and GetConVar("tracer_bomb_adminonly"):GetBool() then return end
-		attacker:SetNWInt("bombCharge", math.Clamp(attacker:GetNWInt("bombCharge", 0) + dmg / 10 * GetConVar("tracer_bomb_charge_multiplier"):GetInt(), 0, 100))
-	end
-	
-	if attacker:GetNWInt("bombCharge") == 100 and not attacker:GetNWBool("ultimateNotified") and attacker:GetInfoNum("tracer_callouts", 0) then
-		attacker:EmitSound("callouts/pulsebomb/ready/" .. math.random(2) .. ".wav")
-		attacker:SetNWBool("ultimateNotified", true)
+		increaseBombCharge(attacker, dmg / 10)
 	end
 end)
 
 function restoreBlinks(player)
 	if player:GetNWInt("blinks") < GetConVar("tracer_blink_stack"):GetInt() then
 		player:SetNWInt("blinks", player:GetNWInt("blinks") + 1)
-		net.Start("blip")
-		net.Send(player)
+		signal("blip", player)
 	else
 		timer.Remove("restoreBlinks_" .. player:UserID())
 	end
@@ -252,8 +273,7 @@ function recall(player)
 		
 		timer.Simple(GetConVar("tracer_recall_cooldown"):GetInt(), function()
 			player:SetNWBool("canRecall", true)	--Regain ability after 12 seconds
-			net.Start("blip")
-			net.Send(player)
+			signal("blip", player)
 		end)
 	end
 end
@@ -331,3 +351,12 @@ end)
 net.Receive("blink", function(length, player) blink(player) end)
 net.Receive("recall", function(length, player) recall(player) end)
 net.Receive("throwBomb", function(length, player) throwBomb(player) end)
+
+net.Receive("tracerAbilitiesConVarChanged", function()
+	local player = player.GetById(net.ReadUInt(7))
+	local conVar = net.ReadString()
+	local value = net.ReadUInt(7)
+	if player:IsAdmin() and value >= 0 and value < 128 then
+		GetConVar(conVar):SetInt(value)
+	end
+end)

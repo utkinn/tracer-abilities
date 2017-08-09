@@ -101,7 +101,7 @@ function increaseBombCharge(player, increase)
 	if not player:IsAdmin() and GetConVar("tracer_bomb_adminonly"):GetBool() then return end
 	player:SetNWInt("bombCharge", math.Clamp(player:GetNWInt("bombCharge", 0) + increase * GetConVar("tracer_bomb_charge_multiplier"):GetInt(), 0, 100))
 	if player:GetNWInt("bombCharge") == 100 and not player:GetNWBool("ultimateNotified") and player:GetInfoNum("tracer_callouts", 0) then
-		player:EmitSound(sounds.pulseBomb.ready[math.random(#sounds.pulseBomb.ready)])
+		player:EmitSound(callouts.pulseBomb.ready[math.random(#callouts.pulseBomb.ready)])
 		player:SetNWBool("ultimateNotified", true)
 	end
 end
@@ -269,7 +269,7 @@ function recall(player)
 			
 			--Such an ugly workaround
 			player:SetNWInt("recallRestoreTime", GetConVar("tracer_recall_cooldown"):GetInt() - 2)
-			timer.Create("recallRestore_" .. player:UserID(), 1, GetConVar("tracer_recall_cooldown"):GetInt(), function()
+			timer.Create("recallRestore_" .. player:UserID(), 1, GetConVar("tracer_recall_cooldown"):GetInt() + 0.1, function()
 				player:SetNWInt("recallRestoreTime", player:GetNWInt("recallRestoreTime") - 1)
 			end)
 		end)

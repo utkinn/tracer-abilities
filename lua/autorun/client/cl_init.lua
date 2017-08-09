@@ -155,18 +155,17 @@ net.Receive("blip", function()
 end)
 
 net.Receive("replicateConVars", function()
-	if LocalPlayer():IsAdmin() then
-		for _, v in pairs(conVars) do
-			cvars.AddChangeCallback("tracerAbilitiesConVarChanged", function(conVar, _, value)
+	for _, v in pairs(conVars) do
+		cvars.AddChangeCallback("tracerAbilitiesConVarChanged", function(conVar, _, value)
+			if LocalPlayer():IsAdmin() then
 				net.Start("tracerAbilitiesConVarChanged")
 					net.WriteUInt(LocalPlayer():UserID(), 7)
 					net.WriteString(conVar)
 					net.WriteUInt(value, 7)
 				net.SendToServer()
-			end)
-		end
+			end
+		end)
 	end
-
 	local values = net.ReadTable()
 	local conVarNames = {}
 	for k, v in pairs(conVars) do

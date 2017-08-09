@@ -1,5 +1,9 @@
 include("tracerAbilities_shared.lua")
 
+timer.Create("reloadControls", 3, 0, function()
+	controls = util.JSONToTable(file.Read("tracerAbilitiesControls.txt"))
+end)
+	
 --HUD materials setup
 materials =
 {
@@ -48,7 +52,7 @@ if not file.Exists("tracerAbilitiesControls.txt", "DATA") then
 		throwBomb = nil
 	}
 else
-	controls = util.KeyValuesToTable(file.Read("tracerAbilitiesControls.txt"))
+	controls = util.JSONToTable(file.Read("tracerAbilitiesControls.txt"))
 end
 	
 --Creating console commands
@@ -61,7 +65,7 @@ CreateClientConVar("tracer_notification_blips", 1, true, false, "Enable ability 
 CreateClientConVar("tracer_hud_crosshair", 1, true, false, "Enable additional crosshair HUD.")
 
 function drawIcon(icon, shouldBeRed, x, y)
-	if GetConVar("tracer_hud"):GetBool() then
+	if GetConVar("tracer_hud"):GetBool() and GetConVar("cl_drawhud"):GetBool() then
 		surface.SetMaterial(icon)
 		if shouldBeRed then
 			surface.SetDrawColor(255, 48, 0, TRANSPARENCY)	--Red
@@ -73,7 +77,7 @@ function drawIcon(icon, shouldBeRed, x, y)
 end
 
 function drawCrosshairIcon(icon, disabledIcon, shouldBeEnabled, x, y)
-	if GetConVar("tracer_hud_crosshair"):GetBool() then
+	if GetConVar("tracer_hud_crosshair"):GetBool() and GetConVar("cl_drawhud"):GetBool() then
 		if not shouldBeEnabled then
 			surface.SetMaterial(disabledIcon)
 		else
@@ -85,14 +89,14 @@ function drawCrosshairIcon(icon, disabledIcon, shouldBeEnabled, x, y)
 end
 
 hook.Add("HUDPaint", "drawIconBackground", function()	--Background rectangle
-	if GetConVar("tracer_hud"):GetBool() then
+	if GetConVar("tracer_hud"):GetBool() and GetConVar("cl_drawhud"):GetBool() then
 		surface.SetDrawColor(0, 0, 0, 75)
 		surface.DrawRect(ScrW() * 0.91, ScrH() * 0.62, ScrW() * 0.085, ScrH() * 0.28)
 	end
 end)
 
 hook.Add("HUDPaint", "drawBlinkIcon", function()
-	if GetConVar("tracer_hud"):GetBool() then
+	if GetConVar("tracer_hud"):GetBool() and GetConVar("cl_drawhud"):GetBool() then
 		local blinks = LocalPlayer():GetNWInt("blinks")
 		drawIcon(materials.blink, blinks == 0, ScrW() * 0.95, ScrH() * 0.65)
 		surface.SetFont("Overwatch")
@@ -107,7 +111,7 @@ hook.Add("HUDPaint", "drawBlinkIcon", function()
 end)
 
 hook.Add("HUDPaint", "drawCrosshairBlinkPiece", function()
-	if GetConVar("tracer_hud_crosshair"):GetBool() then
+	if GetConVar("tracer_hud_crosshair"):GetBool() and GetConVar("cl_drawhud"):GetBool() then
 		local blinks = LocalPlayer():GetNWInt("blinks")
 		drawCrosshairIcon(materials.crosshair.blink[true], materials.crosshair.blink[false], blinks >= 3, ScrW() * 0.48, ScrH() * 0.48)
 		drawCrosshairIcon(materials.crosshair.blink[true], materials.crosshair.blink[false], blinks >= 2, ScrW() * 0.48, ScrH() * 0.49)
@@ -115,14 +119,14 @@ hook.Add("HUDPaint", "drawCrosshairBlinkPiece", function()
 	end
 end)
 
-hook.Add("HUDPaint", "drawCrosshairRecallPiece", function()
-	if GetConVar("tracer_hud_crosshair"):GetBool() then
+hook.Add("HUDPaint", "drawCrosshairRecall", function()
+	if GetConVar("tracer_hud_crosshair"):GetBool() and GetConVar("cl_drawhud"):GetBool() then
 		drawCrosshairIcon(materials.crosshair.recall[true], materials.crosshair.recall[false], LocalPlayer():GetNWBool("canRecall"), ScrW() * 0.51, ScrH() * 0.49)
 	end
 end)
 
 hook.Add("HUDPaint", "drawRecallIcon", function()
-	if GetConVar("tracer_hud"):GetBool() then
+	if GetConVar("tracer_hud"):GetBool() and GetConVar("cl_drawhud"):GetBool() then
 		local canRecall = LocalPlayer():GetNWBool("canRecall")
 		drawIcon(materials.recall, not canRecall, ScrW() * 0.95, ScrH() * 0.75)
 		if not canRecall then
@@ -135,7 +139,7 @@ hook.Add("HUDPaint", "drawRecallIcon", function()
 end)
 
 hook.Add("HUDPaint", "drawBombIcon", function()
-	if GetConVar("tracer_hud"):GetBool() then
+	if GetConVar("tracer_hud"):GetBool() and GetConVar("cl_drawhud"):GetBool() then
 		drawIcon(materials.bomb, false, ScrW() * 0.95, ScrH() * 0.83)
 		surface.SetFont("Overwatch")
 		surface.SetTextColor(255, 208, 64, TRANSPARENCY)
@@ -193,14 +197,12 @@ end
 function updateKeyBinding(control, num)
 	local fileContents = file.Read("tracerAbilitiesControls.txt")
 	if fileContents ~= "" and fileContents ~= nil then
-		controls = util.KeyValuesToTable(fileContents)
+		controls = util.JSONToTable(fileContents)
 	else
 		controls = {}
 	end
-	PrintTable(controls)
 	controls[control] = num
-	PrintTable(controls)
-	file.Write(util.TableToKeyValues(controls))
+	file.Write("tracerAbilitiesControls.txt", util.TableToJSON(controls))
 end
 
 hook.Add("PopulateToolMenu", "populateTracerAbilitiesSettings", function()
@@ -212,18 +214,21 @@ hook.Add("PopulateToolMenu", "populateTracerAbilitiesSettings", function()
 		form:CheckBox("HUD", "tracer_hud")
 		form:ControlHelp("Enable the abilities HUD.")
 		
+		form:CheckBox("Crosshair HUD", "tracer_hud_crosshair")
+		form:ControlHelp("Enable the additionnal abilities HUD on crosshair.")
+		
 		form:CheckBox("Notification blips", "tracer_notification_blips")
 		form:ControlHelp("Enable ability restore notification sound.")
 	end)
 	
-	spawnmenu.AddToolMenuOption("Utilities", "Tracer Abilities", "tracerAbilitiesClient", "Key Bindings", nil, nil, function(form)
-		blinkBinder = binder(form, "Blink", function()
+	spawnmenu.AddToolMenuOption("Utilities", "Tracer Abilities", "tracerAbilitiesBindings", "Key Bindings", nil, nil, function(form)
+		blinkBinder = binder(form, "Blink", function(num)
 			updateKeyBinding("blink", num)
 		end, controls.blink)
-		recallBinder = binder(form, "Recall", function()
+		recallBinder = binder(form, "Recall", function(num)
 			updateKeyBinding("recall", num)
 		end, controls.recall)
-		bombBinder = binder(form, "Throw Pulse Bomb", function()
+		bombBinder = binder(form, "Throw Pulse Bomb", function(num)
 			updateKeyBinding("throwBomb", num)
 		end, controls.throwBomb)
 	end)
@@ -257,16 +262,23 @@ hook.Add("PopulateToolMenu", "populateTracerAbilitiesSettings", function()
 end)
 
 hook.Add("Think", "abilityKeyPressed", function()
-	if LocalPlayer():IsTyping() or gui.IsConsoleVisible() then return end
+	if LocalPlayer():IsTyping() then return end
 	if controls.blink ~= nil then
 		if input.IsKeyDown(controls.blink) then
-			signal("blink")
+			if not blinkCastedOnce then
+				signal("blink")
+				blinkCastedOnce = true
+			end
+		else
+			blinkCastedOnce = false
 		end
-	elseif controls.recall ~= nil then
+	end
+	if controls.recall ~= nil then
 		if input.IsKeyDown(controls.recall) then
 			signal("recall")
 		end
-	elseif controls.throwBomb ~= nil then
+	end
+	if controls.throwBomb ~= nil then
 		if input.IsKeyDown(controls.throwBomb) then
 			signal("throwBomb")
 		end

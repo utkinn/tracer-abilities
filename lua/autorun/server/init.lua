@@ -100,7 +100,7 @@ end)
 function increaseBombCharge(player, increase)
 	if not player:IsAdmin() and GetConVar("tracer_bomb_adminonly"):GetBool() then return end
 	player:SetNWInt("bombCharge", math.Clamp(player:GetNWInt("bombCharge", 0) + increase * GetConVar("tracer_bomb_charge_multiplier"):GetInt(), 0, 100))
-	if player:GetNWInt("bombCharge") == 100 and not player:GetNWBool("ultimateNotified") and player:GetInfoNum("tracer_callouts") then
+	if player:GetNWInt("bombCharge") == 100 and not player:GetNWBool("ultimateNotified") and player:GetInfoNum("tracer_callouts", 0) then
 		player:EmitSound(sounds.pulseBomb.ready[math.random(#sounds.pulseBomb.ready)])
 		player:SetNWBool("ultimateNotified", true)
 	end
@@ -232,7 +232,11 @@ function recall(player)
 		
 		local oldMaterial = player:GetMaterial()
 		
+		local godBeforeRecall = player:HasGodMode()
+		--local noTargetBeforeRecall
+		
 		player:GodEnable()
+		player:SetNoTarget(true)
 		player:SetRenderMode(RENDERMODE_TRANSALPHA)
 		player:SetColor(Color(0, 0, 0, 0))
 		--player:Lock()
@@ -251,7 +255,10 @@ function recall(player)
 			player:Extinguish()
 		end)
 		timer.Simple(1.25, function()
-			player:GodDisable()
+			if not godBeforeRecall then
+				player:GodDisable()
+			end
+			player:SetNoTarget(false)
 			player:SetRenderMode(RENDERMODE_NORMAL)
 			player:SetColor(Color(255, 255, 255, 255))
 			--player:UnLock()
@@ -340,7 +347,7 @@ hook.Add("InitPostEntity", "staticBombCharge", function()
 	timer.Create("staticBombCharge", 2, 0, function()
 		for _, player in pairs(player.GetAll()) do
 			player:SetNWInt("bombCharge", math.Clamp(player:GetNWInt("bombCharge", 0) + GetConVar("tracer_bomb_charge_multiplier"):GetInt(), 0, 100))
-			if player:GetNWInt("bombCharge") == 100 and not player:GetNWBool("ultimateNotified") and player:GetInfoNum("tracer_callouts") then
+			if player:GetNWInt("bombCharge") == 100 and not player:GetNWBool("ultimateNotified") and player:GetInfoNum("tracer_callouts", 0) then
 				player:EmitSound("callouts/pulsebomb/ready/" .. math.random(2) .. ".wav")
 				player:SetNWBool("ultimateNotified", true)
 			end

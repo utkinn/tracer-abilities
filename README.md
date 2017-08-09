@@ -1,4 +1,4 @@
-# tracer-abilities
+# Overwatch: Tracer Abilities
 
 This addon for Garry's Mod lets you to use the abilities of Tracer from Overwatch.
 

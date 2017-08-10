@@ -233,7 +233,6 @@ function recall(player)
 		local oldMaterial = player:GetMaterial()
 		
 		local godBeforeRecall = player:HasGodMode()
-		--local noTargetBeforeRecall
 		
 		player:GodEnable()
 		player:SetNoTarget(true)
@@ -248,8 +247,12 @@ function recall(player)
 			local recallData = recallSnapshots[i][player]
 			
 			if recallData == nil then return end
-			player:SetHealth(recallData.health)
-			player:SetArmor(recallData.armor)
+			if player:Health() < recallData.health then
+				player:SetHealth(recallData.health)
+			end
+			if player:Armor() < recallData.armor then
+				player:SetArmor(recallData.armor)
+			end
 			player:SetPos(recallData.position)
 			player:SetEyeAngles(recallData.angles)
 			player:Extinguish()
@@ -268,8 +271,9 @@ function recall(player)
 			player:SetNWBool("canRecall", false)
 			
 			--Such an ugly workaround
-			player:SetNWInt("recallRestoreTime", GetConVar("tracer_recall_cooldown"):GetInt() - 2)
-			timer.Create("recallRestore_" .. player:UserID(), 1, GetConVar("tracer_recall_cooldown"):GetInt() + 0.1, function()
+			player:SetNWInt("recallRestoreTime", GetConVar("tracer_recall_cooldown"):GetInt() + 2)
+			timer.Create("recallRestore_" .. player:UserID(), 1, 0, function()
+				if player:GetNWInt("recallRestoreTime") < 0 then timer.Remove("recallRestore_" .. player:UserID()) end
 				player:SetNWInt("recallRestoreTime", player:GetNWInt("recallRestoreTime") - 1)
 			end)
 		end)

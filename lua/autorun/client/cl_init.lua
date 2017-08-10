@@ -133,7 +133,7 @@ hook.Add("HUDPaint", "drawRecallIcon", function()
 			surface.SetFont("Overwatch 0.5x")
 			surface.SetTextColor(255, 48, 0, TRANSPARENCY)
 			surface.SetTextPos(ScrW() * 0.93, ScrH() * 0.76)
-			surface.DrawText(LocalPlayer():GetNWInt("recallRestoreTime"))
+			surface.DrawText(LocalPlayer():GetNWInt("recallRestoreTime") - 3)
 		end
 	end
 end)
@@ -246,7 +246,7 @@ hook.Add("PopulateToolMenu", "populateTracerAbilitiesSettings", function()
 			form:CheckBox("Recall for admins only", "tracer_recall_adminonly")
 			form:ControlHelp("Allow recalling to admins only.")
 			
-			form:NumberWang("Recall cooldown", "tracer_recall_cooldown", 0, 100)
+			form:NumberWang("Recall cooldown", "tracer_recall_cooldown", 1, 100)
 			form:ControlHelp("Cooldown time of recall.")
 			
 			form:CheckBox("Pulse Bomb for admins only", "tracer_bomb_adminonly")

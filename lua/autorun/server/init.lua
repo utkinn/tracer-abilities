@@ -13,9 +13,10 @@ BLINK_LENGHT = 367	--~7 meters
 
 snapshotTick = 0	--Number of current snapshot
 
-recallSnapshots = {}	--Table for storing all snapshots
+recallSnapshots = {}	--Table for storing all snapshots for recalls
 
-sounds = 
+--Sound tables
+sounds =
 {
 	blink =
 	{
@@ -25,7 +26,6 @@ sounds =
 	},
 	recall = Sound("recall.mp3")
 }
-
 callouts =
 {
 	blink =
@@ -66,25 +66,20 @@ callouts =
 
 TICK_RATE = 0.05	--Smoothness of recall.
 
-CreateConVar("tracer_blink_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow blinking to admins only.")
-CreateConVar("tracer_recall_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow recalling to admins only.")
-CreateConVar("tracer_blink_stack", 3, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Blink stack size.")
-CreateConVar("tracer_blink_cooldown", 3, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of one blink in seconds.")
-CreateConVar("tracer_recall_cooldown", 12, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Cooldown of recall in seconds.")
-CreateConVar("tracer_bomb_adminonly", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Allow using pulse bomb to admins only.")
-CreateConVar("tracer_bomb_charge_multiplier", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Multiplier of the pulse bomb charge speed.")
-
-hook.Add("PlayerInitialSpawn", "sendConVarValues", function(player)
+hook.Add("PlayerInitialSpawn", "sendConVarValues", function(player)	--Manual console variable replication.
+	--Collecting values of each console variable
 	local values = {}
 	for _, cvar in pairs(conVars) do
 		table.insert(values, cvar:GetInt())
 	end
 	
+	--Sending values to client
 	net.Start("replicateConVars")
 		net.WriteTable(values)
 	net.Send(player)
 end)
 
+--Resetting abilities after death
 hook.Add("PlayerSpawn", "resetAbilities", function(player)
 	player:SetNWInt("blinks", GetConVar("tracer_blink_stack"):GetInt())
 	player:SetNWBool("canRecall", true)
@@ -93,10 +88,11 @@ hook.Add("PlayerSpawn", "resetAbilities", function(player)
 	timer.Simple(3.1, function() player:SetNWBool("readyForRecall", true) end)
 end)
 
+--Increase the player's Pulse Bomb charge when he deals damage
 function increaseBombCharge(player, increase)
-	if not player:IsAdmin() and GetConVar("tracer_bomb_adminonly"):GetBool() then return end
+	if not player:IsAdmin() and GetConVar("tracer_bomb_adminonly"):GetBool() then return end	--If bomb is available for admins only, regular players don't need to have a charge
 	player:SetNWInt("bombCharge", math.Clamp(player:GetNWInt("bombCharge", 0) + increase * GetConVar("tracer_bomb_charge_multiplier"):GetInt(), 0, 100))
-	if player:GetNWInt("bombCharge") == 100 and not player:GetNWBool("ultimateNotified") and player:GetInfoNum("tracer_callouts", 0) then
+	if player:GetNWInt("bombCharge") == 100 and not player:GetNWBool("ultimateNotified") and player:GetInfoNum("tracer_callouts", 0) then	--Saying "Pulse Bomb ready!"
 		player:EmitSound(callouts.pulseBomb.ready[math.random(#callouts.pulseBomb.ready)])
 		player:SetNWBool("ultimateNotified", true)
 	end
@@ -132,88 +128,6 @@ function emitRecallEffect(player)
 	util.Effect("recall", effectData)
 end
 
-function emitReversedRecallEffect(player)
-	local effectData = EffectData()
-	effectData:SetOrigin(player:GetPos() + Vector(0, 0, 40))
-	util.Effect("reversedRecall", effectData)
-end
-
--- function calculateBlinkPosition(player, pitch)
-	-- local playerAngles = player:EyeAngles()
-	-- playerAngles.pitch = pitch
-	
-	-- local blinkDirection = playerAngles:Forward()
-	
-	-- --Direction blinks
-	-- if player:KeyDown( IN_MOVELEFT ) then blinkDirection = -playerAngles:Right() end
-	-- if player:KeyDown( IN_MOVERIGHT ) then blinkDirection = playerAngles:Right() end
-	-- if player:KeyDown( IN_BACK ) then blinkDirection = -playerAngles:Forward() end
-	
-	-- blinkPosition = player:GetPos() + blinkDirection * BLINK_LENGHT
-	
-	-- local tr = util.TraceEntity({	--Trace and Tracer...
-		-- start = player:GetPos() --[[+ Vector(0, 0, 10)--]],
-		-- endpos = blinkPosition --[[+ Vector(0, 0, 10)--]],
-		-- filter = function()	--Trace(r) passes through all entities
-			-- return false
-		-- end
-	-- }, player)
-	
-	-- return tr, blinkPosition, blinkDirection
--- end
-
--- function executeBlink(player, position, direction)
-	-- local blinkAnim = {}
-	-- blinkAnim.reverse = player:GetPos() - direction * 5	--Rolling back for 1 frame
-	-- blinkAnim[1] = player:GetPos() + direction * BLINK_LENGHT * 0.2
-	-- blinkAnim[2] = player:GetPos() + direction * BLINK_LENGHT * 0.4
-	-- blinkAnim[3] = player:GetPos() + direction * BLINK_LENGHT * 0.6
-	-- blinkAnim[4] = player:GetPos() + direction * BLINK_LENGHT * 0.8
-	-- blinkAnim.full = position
-	
-	-- player:SetPos(blinkAnim.reverse)
-	-- timer.Simple(0.02, function() player:SetPos(blinkAnim[1]) end)
-	-- timer.Simple(0.03, function() player:SetPos(blinkAnim[2]) end)
-	-- timer.Simple(0.04, function() player:SetPos(blinkAnim[3]) end)
-	-- timer.Simple(0.05, function() player:SetPos(blinkAnim[4]) end)
-	-- timer.Simple(0.06, function() player:SetPos(blinkAnim.full) end)
--- end
-
--- function slopeOrWall(player)
-	-- local currentTestedPitch = -1
-	-- while tr.Hit and currentTestedPitch >= -45 do
-		-- tr, blinkPosition = calculateBlinkPosition(player, currentTestedPitch)
-		-- currentTestedPitch = currentTestedPitch - 1
-	-- end
--- end
-
--- function blink(player)
-	-- if GetConVar("tracer_blink_adminonly"):GetBool() then
-		-- if not player:IsAdmin() then return end
-	-- end
-	-- if player:GetNWInt("blinks") > 0 and player:Alive() and not player:IsFrozen() then
-		-- emitBlinkEffect(player)
-		
-		-- if not timer.Exists("restoreBlinks_" .. player:UserID()) then
-			-- timer.Create("restoreBlinks_" .. player:UserID(), GetConVar("tracer_blink_cooldown"):GetInt(), 0, function() restoreBlinks(player) end)	--Reset a cooldown timer
-		-- end
-		
-		-- tr, blinkPosition, blinkDirection = calculateBlinkPosition(player, 0)
-		
-		-- if tr.Hit then
-			-- slopeOrWall(player)
-			-- executeBlink(player, tr.Hit and calculateBlinkPosition(player, 0).HitPos or tr.HitPos, blinkDirection)
-		-- else
-			-- executeBlink(player, blinkPosition, blinkDirection)
-		-- end
-		
-		-- player:EmitSound(sounds.blink[math.random(#sounds.blink)])
-		-- if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.2 then
-			-- timer.Simple(0.33, function() player:EmitSound(callouts.blink[math.random(#callouts.blink)]) end)
-		-- end
-		-- player:SetNWInt("blinks", player:GetNWInt("blinks") - 1)
-	-- end
--- end
 function blink(player)
 	if GetConVar("tracer_blink_adminonly"):GetBool() then
 		if not player:IsAdmin() then return end
@@ -225,7 +139,16 @@ function blink(player)
 			timer.Create("restoreBlinks_" .. player:UserID(), GetConVar("tracer_blink_cooldown"):GetInt(), 0, function() restoreBlinks(player) end)	--Reset a cooldown timer
 		end
 		
-		executeBlink(calculateBlinkPosition(player))
+		local startPos, endPos = calculateBlinkPosition(player)
+		
+		executeBlink(startPos, endPos)
+		
+		player:EmitSound(sounds.blink[math.random(#sounds.blink)])
+		if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.2 then
+			timer.Simple(0.33, function() player:EmitSound(callouts.blink[math.random(#callouts.blink)]) end)
+		end
+		
+		player:SetNWInt("blinks", player:GetNWInt("blinks") - 1)
 	end
 end
 
@@ -260,23 +183,22 @@ function calculateBlinkPosition(player)
 		}, player)
 		
 		if traceResult.Hit then
-			tryUpResult = blinkCalc_tryUp(testedPos, player)
+			tryUpResult = blinkCalc_tryUpOrDown(testedPos, player, true)
 			if not tryUpResult then break else
 				testedPos.z = player:GetPos().z + tryDownResult
 				blinkPositions[testedLength] = testedPos
 			end
 		else
-			tryDownResult = blinkCalc_tryDown(testedPos, player)
+			tryDownResult = blinkCalc_tryUpOrDown(testedPos, player, false)
 			testedPos.z = player:GetPos().z + tryDownResult
 			blinkPositions[testedLength] = testedPos
 		end
-		
-		return blinkPositions
 	end
+	return blinkPositions[1], blinkPosition[#blinkPosition]
 end
 
-function blinkCalc_tryUp(position, player)
-	local testedZOffset = 1
+function blinkCalc_tryUpOrDown(position, player, up)
+	local testedZOffset = up and 1 or -1
 	repeat
 		traceResult = util.TraceEntity(
 		{
@@ -289,31 +211,15 @@ function blinkCalc_tryUp(position, player)
 				end
 			end
 		}, player)
-	until traceResult.Hit and testedZOffset < 18
-	return traceResult.Hit and false or testedZOffset
-end
-
-function blinkCalc_tryDown(position, player)
-	local testedZOffset = -1
-	repeat
-		traceResult = util.TraceEntity(
-		{
-			start = endpos = position + Vector(0, 0, position.z + testedZOffset)
-			filter = function(entity)
-				if GetConVar("tracer_blink_through_props"):GetBool() then
-					return false
-				else
-					return entity:GetClass() == "prop_dynamic"
-				end
-			end
-		}, player)
-	until traceResult.Hit and testedZOffset > -18
+	until traceResult.Hit and (up and testedZOffset < 18 or testedZOffset > -18)
 	return traceResult.Hit and 0 or testedZOffset
 end
 
-function executeBlink(positionsToPassThrough)
-	for i = 2, BLINK_LENGHT + 1 do
-		
+function executeBlink(firstPosition, endPosition)
+	local blinkBeginTime = CurTime()
+	
+	while CurTime() - blinkBeginTime <= 0.5 do
+		player:SetPos(LerpVector((CurTime() - blinkBeginTime) / 0.5), firstPosition, endPosition)
 	end
 end
 

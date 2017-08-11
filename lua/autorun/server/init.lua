@@ -141,7 +141,7 @@ function blink(player)
 		
 		local startPos, endPos = calculateBlinkPosition(player)
 		
-		executeBlink(startPos, endPos)
+		executeBlink(player, startPos, endPos)
 		
 		player:EmitSound(sounds.blink[math.random(#sounds.blink)])
 		if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.2 then
@@ -167,12 +167,13 @@ function calculateBlinkPosition(player)
 	
 	local blinkPositions = {}
 	
-	for testedLength = 1, BLINK_LENGTH do
+	for testedLength = 1, BLINK_LENGHT do
 		local testedPos = player:GetPos() + blinkDirection * testedLength
 		
 		traceResult = util.TraceEntity(
 		{
-			start = endpos = testedPos
+			start = testedPos,
+			endpos = testedPos,
 			filter = function(entity)
 				if GetConVar("tracer_blink_through_props"):GetBool() then
 					return false
@@ -194,7 +195,7 @@ function calculateBlinkPosition(player)
 			blinkPositions[testedLength] = testedPos
 		end
 	end
-	return blinkPositions[1], blinkPosition[#blinkPosition]
+	return blinkPositions[1], blinkPositions[#blinkPositions]
 end
 
 function blinkCalc_tryUpOrDown(position, player, up)
@@ -202,7 +203,8 @@ function blinkCalc_tryUpOrDown(position, player, up)
 	repeat
 		traceResult = util.TraceEntity(
 		{
-			start = endpos = position + Vector(0, 0, position.z + testedZOffset)
+			start = position + Vector(0, 0, position.z + testedZOffset),
+			endpos = position + Vector(0, 0, position.z + testedZOffset),
 			filter = function(entity)
 				if GetConVar("tracer_blink_through_props"):GetBool() then
 					return false
@@ -215,11 +217,13 @@ function blinkCalc_tryUpOrDown(position, player, up)
 	return traceResult.Hit and 0 or testedZOffset
 end
 
-function executeBlink(firstPosition, endPosition)
+function executeBlink(player, firstPosition, endPosition)
 	local blinkBeginTime = CurTime()
+	local timeSinceBlink = CurTime() - blinkBeginTime
 	
-	while CurTime() - blinkBeginTime <= 0.5 do
-		player:SetPos(LerpVector((CurTime() - blinkBeginTime) / 0.5), firstPosition, endPosition)
+	while timeSinceBlink <= 0.5 do
+		timeSinceBlink = CurTime() - blinkBeginTime
+		player:SetPos(LerpVector((timeSinceBlink) / 0.5, firstPosition, endPosition))
 	end
 end
 

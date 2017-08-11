@@ -138,29 +138,29 @@ function emitReversedRecallEffect(player)
 	util.Effect("reversedRecall", effectData)
 end
 
-function calculateBlinkPosition(player, pitch)
-	local playerAngles = player:EyeAngles()
-	playerAngles.pitch = pitch
+-- function calculateBlinkPosition(player, pitch)
+	-- local playerAngles = player:EyeAngles()
+	-- playerAngles.pitch = pitch
 	
-	local blinkDirection = playerAngles:Forward()
+	-- local blinkDirection = playerAngles:Forward()
 	
-	--Direction blinks
-	if player:KeyDown( IN_MOVELEFT ) then blinkDirection = -playerAngles:Right() end
-	if player:KeyDown( IN_MOVERIGHT ) then blinkDirection = playerAngles:Right() end
-	if player:KeyDown( IN_BACK ) then blinkDirection = -playerAngles:Forward() end
+	-- --Direction blinks
+	-- if player:KeyDown( IN_MOVELEFT ) then blinkDirection = -playerAngles:Right() end
+	-- if player:KeyDown( IN_MOVERIGHT ) then blinkDirection = playerAngles:Right() end
+	-- if player:KeyDown( IN_BACK ) then blinkDirection = -playerAngles:Forward() end
 	
-	blinkPosition = player:GetPos() + blinkDirection * BLINK_LENGHT
+	-- blinkPosition = player:GetPos() + blinkDirection * BLINK_LENGHT
 	
-	local tr = util.TraceEntity({	--Trace and Tracer...
-		start = player:GetPos() --[[+ Vector(0, 0, 10)--]],
-		endpos = blinkPosition --[[+ Vector(0, 0, 10)--]],
-		filter = function()	--Trace(r) passes through all entities
-			return false
-		end
-	}, player)
+	-- local tr = util.TraceEntity({	--Trace and Tracer...
+		-- start = player:GetPos() --[[+ Vector(0, 0, 10)--]],
+		-- endpos = blinkPosition --[[+ Vector(0, 0, 10)--]],
+		-- filter = function()	--Trace(r) passes through all entities
+			-- return false
+		-- end
+	-- }, player)
 	
-	return tr, blinkPosition, blinkDirection
-end
+	-- return tr, blinkPosition, blinkDirection
+-- end
 
 function executeBlink(player, position, direction)
 	local blinkAnim = {}
@@ -179,14 +179,41 @@ function executeBlink(player, position, direction)
 	timer.Simple(0.06, function() player:SetPos(blinkAnim.full) end)
 end
 
-function slopeOrWall(player)
-	local currentTestedPitch = -1
-	while tr.Hit and currentTestedPitch >= -45 do
-		tr, blinkPosition = calculateBlinkPosition(player, currentTestedPitch)
-		currentTestedPitch = currentTestedPitch - 1
-	end
-end
+-- function slopeOrWall(player)
+	-- local currentTestedPitch = -1
+	-- while tr.Hit and currentTestedPitch >= -45 do
+		-- tr, blinkPosition = calculateBlinkPosition(player, currentTestedPitch)
+		-- currentTestedPitch = currentTestedPitch - 1
+	-- end
+-- end
 
+-- function blink(player)
+	-- if GetConVar("tracer_blink_adminonly"):GetBool() then
+		-- if not player:IsAdmin() then return end
+	-- end
+	-- if player:GetNWInt("blinks") > 0 and player:Alive() and not player:IsFrozen() then
+		-- emitBlinkEffect(player)
+		
+		-- if not timer.Exists("restoreBlinks_" .. player:UserID()) then
+			-- timer.Create("restoreBlinks_" .. player:UserID(), GetConVar("tracer_blink_cooldown"):GetInt(), 0, function() restoreBlinks(player) end)	--Reset a cooldown timer
+		-- end
+		
+		-- tr, blinkPosition, blinkDirection = calculateBlinkPosition(player, 0)
+		
+		-- if tr.Hit then
+			-- slopeOrWall(player)
+			-- executeBlink(player, tr.Hit and calculateBlinkPosition(player, 0).HitPos or tr.HitPos, blinkDirection)
+		-- else
+			-- executeBlink(player, blinkPosition, blinkDirection)
+		-- end
+		
+		-- player:EmitSound(sounds.blink[math.random(#sounds.blink)])
+		-- if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.2 then
+			-- timer.Simple(0.33, function() player:EmitSound(callouts.blink[math.random(#callouts.blink)]) end)
+		-- end
+		-- player:SetNWInt("blinks", player:GetNWInt("blinks") - 1)
+	-- end
+-- end
 function blink(player)
 	if GetConVar("tracer_blink_adminonly"):GetBool() then
 		if not player:IsAdmin() then return end
@@ -198,21 +225,71 @@ function blink(player)
 			timer.Create("restoreBlinks_" .. player:UserID(), GetConVar("tracer_blink_cooldown"):GetInt(), 0, function() restoreBlinks(player) end)	--Reset a cooldown timer
 		end
 		
-		tr, blinkPosition, blinkDirection = calculateBlinkPosition(player, 0)
-		
-		if tr.Hit then
-			slopeOrWall(player)
-			executeBlink(player, tr.Hit and calculateBlinkPosition(player, 0).HitPos or tr.HitPos, blinkDirection)
-		else
-			executeBlink(player, blinkPosition, blinkDirection)
-		end
-		
-		player:EmitSound(sounds.blink[math.random(#sounds.blink)])
-		if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.2 then
-			timer.Simple(0.33, function() player:EmitSound(callouts.blink[math.random(#callouts.blink)]) end)
-		end
-		player:SetNWInt("blinks", player:GetNWInt("blinks") - 1)
+		calculateBlinkPosition(player)
 	end
+end
+
+function calculateBlinkPosition(player)
+	local playerEyeAngles = player:EyeAngles()
+	playerEyeAngles.pitch = 0
+	
+	--If player isn't moving, we're blinking forward
+	local blinkDirection = playerEyeAngles:Forward()
+	--Direction blinks
+	if player:KeyDown(IN_MOVELEFT) then blinkDirection = -playerEyeAngles:Right() end
+	if player:KeyDown(IN_MOVERIGHT) then blinkDirection = playerEyeAngles:Right() end
+	if player:KeyDown(IN_BACK) then blinkDirection = -playerEyeAngles:Forward() end
+	
+	blinkPosition = player:GetPos() + blinkDirection * BLINK_LENGHT
+	
+	local blinkPositions = {}
+	
+	for testedLength = 1, BLINK_LENGTH do
+		local testedPos = player:GetPos() + blinkDirection * testedLength
+		
+		traceResult = util.TraceEntity(
+		{
+			start = endpos = testedPos
+			filter = function(entity)
+				if GetConVar("tracer_blink_through_props"):GetBool() then
+					return false
+				else
+					return entity:GetClass() == "prop_dynamic"
+				end
+			end
+		}, player)
+		
+		if traceResult.Hit then
+			tryUpResult = blinkCalc_tryUp(testedPos)
+			if not tryUpResult then break else
+				testedPos.z = tryUpResult
+				blinkPositions[testedLength] = testedPos
+			end
+		else
+			blinkCalc_tryDown()
+			--todo
+		end
+		
+		executeBlinks(blinkPositions)
+	end
+end
+
+function blinkCalc_tryUp(position)
+	local testedZOffset = 1
+	repeat
+		traceResult = util.TraceEntity(
+		{
+			start = endpos = position + Vector(0, 0, position.z + testedZOffset)
+			filter = function(entity)
+				if GetConVar("tracer_blink_through_props"):GetBool() then
+					return false
+				else
+					return entity:GetClass() == "prop_dynamic"
+				end
+			end
+		}, player)
+	until traceResult.Hit and testedZOffset < 18
+	return traceResult.Hit and false or testedZOffset
 end
 
 function recall(player)

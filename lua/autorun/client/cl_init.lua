@@ -239,6 +239,9 @@ hook.Add("PopulateToolMenu", "populateTracerAbilitiesSettings", function()
 			form:NumberWang("Blink cooldown", "tracer_blink_cooldown", 0, 100)
 			form:ControlHelp("Cooldown time of a single blink.")
 			
+			form:CheckBox("Blink through props", "tracer_blink_through_props")
+			form:ControlHelp("Allow blinking through props and entities.")
+			
 			form:CheckBox("Recall for admins only", "tracer_recall_adminonly")
 			form:ControlHelp("Allow recalling to admins only.")
 			

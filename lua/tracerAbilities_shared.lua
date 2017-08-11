@@ -18,4 +18,5 @@ conVars =
 	CreateConVar("tracer_recall_cooldown", 12, flags, "Cooldown of recall in seconds."),
 	CreateConVar("tracer_bomb_adminonly", 0, flags, "Allow using pulse bomb to admins only."),
 	CreateConVar("tracer_bomb_charge_multiplier", 1, flags, "Multiplier of the pulse bomb charge speed.")
+	CreateConVar("tracer_blink_through_props", 1, flags, "Allow blinking through props and entities.")
 }

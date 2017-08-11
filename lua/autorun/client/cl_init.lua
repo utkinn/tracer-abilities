@@ -1,9 +1,5 @@
 include("tracerAbilities_shared.lua")
 
-timer.Create("reloadControls", 3, 0, function()
-	controls = util.JSONToTable(file.Read("tracerAbilitiesControls.txt"))
-end)
-	
 --HUD materials setup
 materials =
 {

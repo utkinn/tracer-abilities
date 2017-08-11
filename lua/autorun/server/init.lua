@@ -1,7 +1,3 @@
--- AddCSLuaFile("autorun/client/cl_init.lua")
--- AddCSLuaFile("autorun/effects/blink.lua")
--- AddCSLuaFile("autorun/effects/recall.lua")
--- AddCSLuaFile("autorun/entities/pulseBomb.lua")
 AddCSLuaFile("tracerAbilities_shared.lua")
 
 include("tracerAbilities_shared.lua")

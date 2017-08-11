@@ -162,22 +162,22 @@ end
 	-- return tr, blinkPosition, blinkDirection
 -- end
 
-function executeBlink(player, position, direction)
-	local blinkAnim = {}
-	blinkAnim.reverse = player:GetPos() - direction * 5	--Rolling back for 1 frame
-	blinkAnim[1] = player:GetPos() + direction * BLINK_LENGHT * 0.2
-	blinkAnim[2] = player:GetPos() + direction * BLINK_LENGHT * 0.4
-	blinkAnim[3] = player:GetPos() + direction * BLINK_LENGHT * 0.6
-	blinkAnim[4] = player:GetPos() + direction * BLINK_LENGHT * 0.8
-	blinkAnim.full = position
+-- function executeBlink(player, position, direction)
+	-- local blinkAnim = {}
+	-- blinkAnim.reverse = player:GetPos() - direction * 5	--Rolling back for 1 frame
+	-- blinkAnim[1] = player:GetPos() + direction * BLINK_LENGHT * 0.2
+	-- blinkAnim[2] = player:GetPos() + direction * BLINK_LENGHT * 0.4
+	-- blinkAnim[3] = player:GetPos() + direction * BLINK_LENGHT * 0.6
+	-- blinkAnim[4] = player:GetPos() + direction * BLINK_LENGHT * 0.8
+	-- blinkAnim.full = position
 	
-	player:SetPos(blinkAnim.reverse)
-	timer.Simple(0.02, function() player:SetPos(blinkAnim[1]) end)
-	timer.Simple(0.03, function() player:SetPos(blinkAnim[2]) end)
-	timer.Simple(0.04, function() player:SetPos(blinkAnim[3]) end)
-	timer.Simple(0.05, function() player:SetPos(blinkAnim[4]) end)
-	timer.Simple(0.06, function() player:SetPos(blinkAnim.full) end)
-end
+	-- player:SetPos(blinkAnim.reverse)
+	-- timer.Simple(0.02, function() player:SetPos(blinkAnim[1]) end)
+	-- timer.Simple(0.03, function() player:SetPos(blinkAnim[2]) end)
+	-- timer.Simple(0.04, function() player:SetPos(blinkAnim[3]) end)
+	-- timer.Simple(0.05, function() player:SetPos(blinkAnim[4]) end)
+	-- timer.Simple(0.06, function() player:SetPos(blinkAnim.full) end)
+-- end
 
 -- function slopeOrWall(player)
 	-- local currentTestedPitch = -1
@@ -225,7 +225,7 @@ function blink(player)
 			timer.Create("restoreBlinks_" .. player:UserID(), GetConVar("tracer_blink_cooldown"):GetInt(), 0, function() restoreBlinks(player) end)	--Reset a cooldown timer
 		end
 		
-		calculateBlinkPosition(player)
+		executeBlink(calculateBlinkPosition(player))
 	end
 end
 
@@ -260,21 +260,22 @@ function calculateBlinkPosition(player)
 		}, player)
 		
 		if traceResult.Hit then
-			tryUpResult = blinkCalc_tryUp(testedPos)
+			tryUpResult = blinkCalc_tryUp(testedPos, player)
 			if not tryUpResult then break else
-				testedPos.z = tryUpResult
+				testedPos.z = player:GetPos().z + tryDownResult
 				blinkPositions[testedLength] = testedPos
 			end
 		else
-			blinkCalc_tryDown()
-			--todo
+			tryDownResult = blinkCalc_tryDown(testedPos, player)
+			testedPos.z = player:GetPos().z + tryDownResult
+			blinkPositions[testedLength] = testedPos
 		end
 		
-		executeBlinks(blinkPositions)
+		return blinkPositions
 	end
 end
 
-function blinkCalc_tryUp(position)
+function blinkCalc_tryUp(position, player)
 	local testedZOffset = 1
 	repeat
 		traceResult = util.TraceEntity(
@@ -290,6 +291,30 @@ function blinkCalc_tryUp(position)
 		}, player)
 	until traceResult.Hit and testedZOffset < 18
 	return traceResult.Hit and false or testedZOffset
+end
+
+function blinkCalc_tryDown(position, player)
+	local testedZOffset = -1
+	repeat
+		traceResult = util.TraceEntity(
+		{
+			start = endpos = position + Vector(0, 0, position.z + testedZOffset)
+			filter = function(entity)
+				if GetConVar("tracer_blink_through_props"):GetBool() then
+					return false
+				else
+					return entity:GetClass() == "prop_dynamic"
+				end
+			end
+		}, player)
+	until traceResult.Hit and testedZOffset > -18
+	return traceResult.Hit and 0 or testedZOffset
+end
+
+function executeBlink(positionsToPassThrough)
+	for i = 2, BLINK_LENGHT + 1 do
+		
+	end
 end
 
 function recall(player)

@@ -66,6 +66,8 @@ callouts =
 
 TICK_RATE = 0.05	--Smoothness of recall.
 
+BLINK_TIME = 0.06
+
 hook.Add("PlayerInitialSpawn", "sendConVarValues", function(player)	--Manual console variable replication.
 	--Collecting values of each console variable
 	local values = {}
@@ -143,6 +145,7 @@ function blink(player)
 		
 		executeBlink(player, startPos, endPos)
 		
+		
 		player:EmitSound(sounds.blink[math.random(#sounds.blink)])
 		if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.2 then
 			timer.Simple(0.33, function() player:EmitSound(callouts.blink[math.random(#callouts.blink)]) end)
@@ -213,18 +216,32 @@ function blinkCalc_tryUpOrDown(position, player, up)
 				end
 			end
 		}, player)
-	until traceResult.Hit and (up and testedZOffset < 18 or testedZOffset > -18)
+		testedZOffset = testedZOffset + (up and 1 or -1)
+		if up then
+			if not traceResult.Hit or testedZOffset > 18 then break end
+		else
+			if traceResult.Hit or testedZOffset < -18 then
+				testedZOffset = testedZOffset + 1
+				break
+			end
+		end
+	until false
 	return traceResult.Hit and 0 or testedZOffset
 end
 
-function executeBlink(player, firstPosition, endPosition)
-	local blinkBeginTime = CurTime()
-	local timeSinceBlink = CurTime() - blinkBeginTime
+function executeBlink(player, startPosition, endPosition)
+	-- local blinkBeginTime = CurTime()
+	-- local timeSinceBlink = CurTime() - blinkBeginTime
 	
-	while timeSinceBlink <= 0.5 do
-		timeSinceBlink = CurTime() - blinkBeginTime
-		player:SetPos(LerpVector((timeSinceBlink) / 0.5, firstPosition, endPosition))
-	end
+	-- while timeSinceBlink <= 0.5 do
+		-- timeSinceBlink = CurTime() - blinkBeginTime
+		-- player:SetPos(LerpVector((timeSinceBlink) / 0.5, firstPosition, endPosition))
+	-- end
+	local lerpRatio = 0
+	timer.Create("blink:" .. player:UserID(), engine.TickInterval(), BLINK_TIME / engine.TickInterval(), function()
+		player:SetPos(LerpVector(lerpRatio, startPosition, endPosition))
+		lerpRatio = lerpRatio + 1 / (BLINK_TIME / engine.TickInterval())
+	end)
 end
 
 function recall(player)

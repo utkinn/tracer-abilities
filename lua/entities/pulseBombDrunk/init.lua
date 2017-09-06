@@ -66,3 +66,7 @@ function ENT:PhysicsCollide(data, collidedPhysObject)
 		end
 	end)
 end
+
+function ENT:GetRelationship()
+	return D_FR
+end

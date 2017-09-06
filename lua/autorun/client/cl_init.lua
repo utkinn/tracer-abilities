@@ -41,14 +41,14 @@ hook.Add("InitPostEntity", "createFont", createFonts)
 TRANSPARENCY = 255
 
 if not file.Exists("tracerAbilitiesControls.txt", "DATA") then
-	controls =
+	tracerControls =
 	{
 		blink = nil,
 		recall = nil,
 		throwBomb = nil
 	}
 else
-	controls = util.JSONToTable(file.Read("tracerAbilitiesControls.txt"))
+	tracerControls = util.JSONToTable(file.Read("tracerAbilitiesControls.txt"))
 end
 	
 --Creating console commands
@@ -192,12 +192,12 @@ end
 function updateKeyBinding(control, num)
 	local fileContents = file.Read("tracerAbilitiesControls.txt")
 	if fileContents ~= "" and fileContents ~= nil then
-		controls = util.JSONToTable(fileContents)
+		tracerControls = util.JSONToTable(fileContents)
 	else
-		controls = {}
+		tracerControls = {}
 	end
-	controls[control] = num
-	file.Write("tracerAbilitiesControls.txt", util.TableToJSON(controls))
+	tracerControls[control] = num
+	file.Write("tracerAbilitiesControls.txt", util.TableToJSON(tracerControls))
 end
 
 hook.Add("PopulateToolMenu", "populateTracerAbilitiesSettings", function()
@@ -219,13 +219,13 @@ hook.Add("PopulateToolMenu", "populateTracerAbilitiesSettings", function()
 	spawnmenu.AddToolMenuOption("Utilities", "Tracer Abilities", "tracerAbilitiesBindings", "Key Bindings", nil, nil, function(form)
 		blinkBinder = binder(form, "Blink", function(num)
 			updateKeyBinding("blink", num)
-		end, controls.blink)
+		end, tracerControls.blink)
 		recallBinder = binder(form, "Recall", function(num)
 			updateKeyBinding("recall", num)
-		end, controls.recall)
+		end, tracerControls.recall)
 		bombBinder = binder(form, "Throw Pulse Bomb", function(num)
 			updateKeyBinding("throwBomb", num)
-		end, controls.throwBomb)
+		end, tracerControls.throwBomb)
 	end)
 	
 	--Graphic settings for admins
@@ -258,8 +258,8 @@ end)
 
 hook.Add("Think", "abilityKeyPressed", function()
 	if LocalPlayer():IsTyping() then return end
-	if controls.blink ~= nil then
-		if input.IsKeyDown(controls.blink) then
+	if tracerControls.blink ~= nil then
+		if input.IsKeyDown(tracerControls.blink) then
 			if not blinkCastedOnce then
 				signal("blink")
 				blinkCastedOnce = true
@@ -268,13 +268,13 @@ hook.Add("Think", "abilityKeyPressed", function()
 			blinkCastedOnce = false
 		end
 	end
-	if controls.recall ~= nil then
-		if input.IsKeyDown(controls.recall) then
+	if tracerControls.recall ~= nil then
+		if input.IsKeyDown(tracerControls.recall) then
 			signal("recall")
 		end
 	end
-	if controls.throwBomb ~= nil then
-		if input.IsKeyDown(controls.throwBomb) then
+	if tracerControls.throwBomb ~= nil then
+		if input.IsKeyDown(tracerControls.throwBomb) then
 			signal("throwBomb")
 		end
 	end

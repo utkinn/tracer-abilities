@@ -1,5 +1,11 @@
 {
-	"title"		:	"Overwatch Tracer: Abilities",
-	"type"		:	"weapon",
-	"ignore"	:	[".git/*", "README.md"]
+  "title": "Overwatch Tracer: Abilities",
+  "type": "weapon",
+  "ignore": [
+    ".git/*",
+    "README.md",
+    ".idea/*",
+    "*.iml",
+    ".gitignore"
+  ]
 }

@@ -200,7 +200,7 @@ function slopeOrWall(player)
 end
 
 function blink(player)
-    if GetConVar("tracer_blink_adminonly"):GetBool() then
+    if GetConVar("tracer_blink_admin_only"):GetBool() then
         if not player:IsAdmin() then
             return
         end
@@ -234,7 +234,7 @@ function blink(player)
 end
 
 function recall(player)
-    if GetConVar("tracer_recall_adminonly"):GetBool() then
+    if GetConVar("tracer_recall_admin_only"):GetBool() then
         if not player:IsAdmin() then
             return
         end
@@ -312,7 +312,7 @@ function recall(player)
 end
 
 function throwBomb(player)
-    if GetConVar("tracer_bomb_adminonly"):GetBool() then
+    if GetConVar("tracer_bomb_admin_only"):GetBool() then
         if not player:IsAdmin() then
             return
         end

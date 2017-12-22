@@ -71,8 +71,8 @@ hook.Add(
                 form:Help("You must have admin privilegies to change these settings.")
                 return
             end
-            
-            form:CheckBox("Blink for admins only", "tracer_blink_adminonly")
+
+            form:CheckBox("Blink for admins only", "tracer_blink_admin_only")
             form:ControlHelp("Allow blinking to admins only.")
 
             form:NumberWang("Blink stack size", "tracer_blink_stack", 0, 100)

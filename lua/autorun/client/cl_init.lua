@@ -3,7 +3,7 @@ include("tracer_abilities_shared.lua")
 net.Receive("replicateConVars", function()
     for _, v in pairs(conVars) do
         cvars.AddChangeCallback("Tracer Abilities convar changed",
-        -- ,function(conVar, _, value)
+        function(conVar, _, value)
             if LocalPlayer():IsAdmin() then
                 net.Start("tracerAbilitiesConVarChanged")
                 net.WriteUInt(LocalPlayer():UserID(), 7)

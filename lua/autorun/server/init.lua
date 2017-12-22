@@ -91,7 +91,7 @@ function increaseBombCharge(player, increase)
         return
     end
     player:SetNWInt("bombCharge", math.Clamp(player:GetNWInt("bombCharge", 0) + increase * GetConVar("tracer_bomb_charge_multiplier"):GetInt(), 0, 100))
-    if player:GetNWInt("bombCharge") == 100 and not player:GetNWBool("ultimateNotified") and player:GetInfoNum("tracer_callouts", 0) then
+    if player:GetNWInt("bombCharge") == 100 and not player:GetNWBool("ultimateNotified") and player:GetInfoNum("tracer_callouts", 0) == 1 then
         player:EmitSound(callouts.pulseBomb.ready[math.random(#callouts.pulseBomb.ready)])
         player:SetNWBool("ultimateNotified", true)
     end
@@ -224,7 +224,7 @@ function blink(player)
         end
 
         player:EmitSound(sounds.blink[math.random(#sounds.blink)])
-        if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.2 then
+        if player:GetInfoNum("tracer_callouts", 0) == 1 and math.random() < 0.2 then
             timer.Simple(0.33, function()
                 player:EmitSound(callouts.blink[math.random(#callouts.blink)])
             end)
@@ -298,7 +298,7 @@ function recall(player)
             end)
         end)
 
-        if player:GetInfoNum("tracer_callouts", 0) and math.random() < 0.75 then
+        if player:GetInfoNum("tracer_callouts", 0) == 1 and math.random() < 0.75 then
             timer.Simple(1.5, function()
                 player:EmitSound(callouts.recall[math.random(#callouts.recall)])
             end)

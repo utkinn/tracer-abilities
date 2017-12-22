@@ -67,7 +67,7 @@ hook.Add(
         --Graphic settings for admins
         spawnmenu.AddToolMenuOption("Utilities", "Tracer Abilities", "tracerAbilitiesAdmin", "Admin Settings", nil, nil,
         function(form)
-            if LocalPlayer():IsAdmin() then
+            if not LocalPlayer():IsAdmin() then
                 form:Help("You must have admin privilegies to change these settings.")
                 return
             end

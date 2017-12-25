@@ -72,7 +72,7 @@ local function createBomb(player)
     return bomb
 end
 
-local function kickBomb(bomb)
+local function kickBomb(player, bomb)
     local phys = bomb:GetPhysicsObject()
     phys:ApplyForceCenter(player:EyeAngles():Forward() * 3000 + Vector(0, 0, 1500))
 end
@@ -81,7 +81,7 @@ function throwBomb(player)
     resetCalloutOnThrow(player)
 
     local bomb = createBomb(player)
-    kickBomb(bomb)
+    kickBomb(player, bomb)
 
     bomb:NetworkVarNotify("Stuck", function(entity, varName, _, value)
         playBombThrowCallout(entity:GetOwner(), value)

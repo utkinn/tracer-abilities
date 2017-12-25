@@ -5,10 +5,11 @@ recallSnapshots = {}    --Table for storing all snapshots
 local function createEffectData(player)
     local effectData = EffectData()
     effectData:SetOrigin(player:GetPos() + Vector(0, 0, 40))
+    return effectData
 end
 
 local function emitRecallEffect(player)
-    createEffectData(player)
+    local effectData = createEffectData(player)
     util.Effect("recall", effectData)
 end
 

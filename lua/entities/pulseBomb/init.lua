@@ -11,20 +11,20 @@ local function spawnFearThing(bombPosition)
 end
 
 function ENT:SetupDataTables()
-    bomb:NetworkVar("Bool", 0, "Collided")
-    bomb:NetworkVar("Bool", 1, "Stuck")
+    self:NetworkVar("Bool", 0, "Collided")
+    self:NetworkVar("Bool", 1, "Stuck")
 end
 
 function ENT:Initialize()
-    bomb:SetModel("models/props_combine/combine_mine01.mdl")
-    bomb:SetModelScale(0.3)
+    self:SetModel("models/props_combine/combine_mine01.mdl")
+    self:SetModelScale(0.3)
 
-    bomb:PhysicsInit(SOLID_VPHYSICS)
-    bomb:SetMoveType(MOVETYPE_VPHYSICS)
-    bomb:SetSolid(SOLID_VPHYSICS)
-    bomb:PhysWake()
+    self:PhysicsInit(SOLID_VPHYSICS)
+    self:SetMoveType(MOVETYPE_VPHYSICS)
+    self:SetSolid(SOLID_VPHYSICS)
+    self:PhysWake()
 
-    bomb:SetCollided(false)
+    self:SetCollided(false)
 end
 
 function ENT:SpawnFunction(spawner, trace, class)
@@ -63,25 +63,25 @@ function createEffect(bomb)
 end
 
 function ENT:PhysicsCollide(data, collidedPhysObject)
-    if not bomb:GetCollided() then
-        bomb:SetCollided(true)
-        bomb:SetAngles(data.HitNormal:Angle() + Angle(-90, 0, 0))
+    if not self:GetCollided() then
+        self:SetCollided(true)
+        self:SetAngles(data.HitNormal:Angle() + Angle(-90, 0, 0))
 
-        spawnFearThing(bomb:GetPos())
+        spawnFearThing(self:GetPos())
 
         local hitEnt = data.HitEntity
         if hitEnt:IsWorld() then
-            bomb:GetPhysicsObject():EnableMotion(false)
+            self:GetPhysicsObject():EnableMotion(false)
         else
-            bomb:SetParent(hitEnt)
+            self:SetParent(hitEnt)
         end
 
         if hitEnt:IsPlayer() or hitEnt:IsNPC() then
-            bomb:SetStuck(true)
+            self:SetStuck(true)
         else
-            bomb:SetStuck(false)
+            self:SetStuck(false)
         end
 
-        createEffect(bomb)
+        createEffect(self)
     end
 end

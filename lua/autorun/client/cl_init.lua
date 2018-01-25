@@ -1,11 +1,11 @@
 include("tracer_abilities_shared.lua")
 
-net.Receive("replicateConVars", function()
+net.Receive("OWTA_replicateConVars", function()
     for _, v in pairs(conVars) do
         cvars.AddChangeCallback("Tracer Abilities convar changed",
         function(conVar, _, value)
             if LocalPlayer():IsAdmin() then
-                net.Start("tracerAbilitiesConVarChanged")
+                net.Start("OWTA_conVarChanged")
                 net.WriteUInt(LocalPlayer():UserID(), 7)
                 net.WriteString(conVar)
                 net.WriteUInt(value, 7)
@@ -31,7 +31,7 @@ hook.Add("Think", "Ability key pressed", function()
     if tracerControls.blink ~= nil then
         if input.IsKeyDown(tracerControls.blink) then
             if not blinkCastedOnce then
-                signal("blink")
+                signal("OWTA_blink")
                 blinkCastedOnce = true
             end
         else
@@ -40,12 +40,12 @@ hook.Add("Think", "Ability key pressed", function()
     end
     if tracerControls.recall ~= nil then
         if input.IsKeyDown(tracerControls.recall) then
-            signal("recall")
+            signal("OWTA_recall")
         end
     end
     if tracerControls.throwBomb ~= nil then
         if input.IsKeyDown(tracerControls.throwBomb) then
-            signal("throwBomb")
+            signal("OWTA_throwBomb")
         end
     end
 end)

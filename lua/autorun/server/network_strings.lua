@@ -1,6 +1,0 @@
-util.AddNetworkString("blink")
-util.AddNetworkString("recall")
-util.AddNetworkString("throwBomb")
-util.AddNetworkString("blip")
-util.AddNetworkString("tracerAbilitiesConVarChanged")
-util.AddNetworkString("replicateConVars")

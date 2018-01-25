@@ -1,7 +1,6 @@
 AddCSLuaFile("tracer_abilities_shared.lua")
 include("tracer_abilities_shared.lua")
-
-TICK_RATE = 0.05    --Smoothness of recall.
+include('server/network_strings.lua')
 
 hook.Add("PlayerInitialSpawn", "sendConVarValues", function(player)
     local values = {}
@@ -9,7 +8,7 @@ hook.Add("PlayerInitialSpawn", "sendConVarValues", function(player)
         table.insert(values, convar:GetInt())
     end
 
-    net.Start("replicateConVars")
+    net.Start("OWTA_replicateConVars")
         net.WriteTable(values)
     net.Send(player)
 end)
@@ -19,13 +18,13 @@ hook.Add("PlayerSpawn", "resetAbilities", function(player)
     player:SetNWBool("canRecall", true)
     player:SetNWBool("readyForRecall", false)
     player:SetNWBool("ultimateNotified", false)
-    
+
     timer.Simple(3.1, function()
         player:SetNWBool("readyForRecall", true)
     end)
 end)
 
-net.Receive("tracerAbilitiesConVarChanged", function()
+net.Receive("OWTA_conVarChanged", function()
     local player = player.GetById(net.ReadUInt(7))
     local conVar = net.ReadString()
     local value = net.ReadUInt(7)

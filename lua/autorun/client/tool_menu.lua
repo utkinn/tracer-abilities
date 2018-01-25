@@ -23,45 +23,45 @@ hook.Add(
     function()
         --Graphic settings for players
         spawnmenu.AddToolMenuOption(
-            "Utilities",
-            "Tracer Abilities",
-            "tracerAbilitiesClient",
-            "User Settings",
-            nil,
-            nil,
-            function(form)
-                form:CheckBox("Callouts", "tracer_callouts")
-                form:ControlHelp("Say Tracer's phrases when you use abilities.")
+                "Utilities",
+                "Tracer Abilities",
+                "tracerAbilitiesClient",
+                "User Settings",
+                nil,
+                nil,
+                function(form)
+                    form:CheckBox("Callouts", "tracer_callouts")
+                    form:ControlHelp("Say Tracer's phrases when you use abilities.")
 
-                form:CheckBox("HUD", "tracer_hud")
-                form:ControlHelp("Enable the abilities HUD.")
+                    form:CheckBox("HUD", "tracer_hud")
+                    form:ControlHelp("Enable the abilities HUD.")
 
-                form:CheckBox("Crosshair HUD", "tracer_hud_crosshair")
-                form:ControlHelp("Enable the additional abilities HUD on crosshair.")
+                    form:CheckBox("Crosshair HUD", "tracer_hud_crosshair")
+                    form:ControlHelp("Enable the additional abilities HUD on crosshair.")
 
-                form:CheckBox("Notification blips", "tracer_notification_blips")
-                form:ControlHelp("Enable ability restore notification sound.")
-            end
+                    form:CheckBox("Notification blips", "tracer_notification_blips")
+                    form:ControlHelp("Enable ability restore notification sound.")
+                end
         )
 
         spawnmenu.AddToolMenuOption(
-            "Utilities",
-            "Tracer Abilities",
-            "tracerAbilitiesBindings",
-            "Key Bindings",
-            nil,
-            nil,
-            function(form)
-                blinkBinder = createBinder(form, "Blink", function(num)
-                    updateKeyBinding("blink", num)
-                end, tracerControls.blink)
-                recallBin = createBinder(form, "Recall", function(num)
-                    updateKeyBinding("recall", num)
-                end, tracerControls.recall)
-                bombBinder = createBinder(form, "Throw Pulse Bomb", function(num)
-                    updateKeyBinding("throwBomb", num)
-                end, tracerControls.throwBomb)
-            end
+                "Utilities",
+                "Tracer Abilities",
+                "tracerAbilitiesBindings",
+                "Key Bindings",
+                nil,
+                nil,
+                function(form)
+                    blinkBinder = createBinder(form, "Blink", function(num)
+                        updateKeyBinding("blink", num)
+                    end, tracerControls.blink)
+                    recallBin = createBinder(form, "Recall", function(num)
+                        updateKeyBinding("recall", num)
+                    end, tracerControls.recall)
+                    bombBinder = createBinder(form, "Throw Pulse Bomb", function(num)
+                        updateKeyBinding("throwBomb", num)
+                    end, tracerControls.throwBomb)
+                end
         )
 
         --Graphic settings for admins
@@ -75,14 +75,15 @@ hook.Add(
             form:CheckBox("Blink for admins only", "tracer_blink_admin_only")
             form:ControlHelp("Allow blinking to admins only.")
 
-            form:NumberWang("Blink stack size", "tracer_blink_stack", 0, 100)
-            form:NumberWang("Blink cooldown", "tracer_blink_cooldown", 0, 100)
+            -- FIXME: Zero values on number wangs
+            form:NumSlider("Blink stack size", "tracer_blink_stack", 0, 100)
+            form:NumSlider("Blink cooldown", "tracer_blink_cooldown", 0, 100)
             form:ControlHelp("Cooldown time of a single blink.")
 
             form:CheckBox("Recall for admins only", "tracer_recall_admin_only")
             form:ControlHelp("Allow recalling to admins only.")
 
-            form:NumberWang("Recall cooldown", "tracer_recall_cooldown", 1, 100)
+            form:NumSlider("Recall cooldown", "tracer_recall_cooldown", 1, 100)
             form:ControlHelp("Cooldown time of recall.")
 
             form:CheckBox("Pulse Bomb for admins only", "tracer_bomb_admin_only")

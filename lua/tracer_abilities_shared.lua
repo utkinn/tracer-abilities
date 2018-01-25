@@ -18,3 +18,5 @@ conVars = {
     CreateConVar("tracer_bomb_admin_only", 0, flags, "Allow using pulse bomb to admins only."),
     CreateConVar("tracer_bomb_charge_multiplier", 1, flags, "Multiplier of the pulse bomb charge speed.")
 }
+
+TICK_RATE = 0.05    --Smoothness of recall.

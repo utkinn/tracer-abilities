@@ -41,6 +41,7 @@ end
 
 local function increaseBombCharge(player, increase)
     if not player:IsAdmin() and GetConVar("tracer_bomb_admin_only"):GetBool() then return end
+
     player:SetNWInt(
             "bombCharge",
             math.Clamp(
@@ -113,6 +114,6 @@ end)
 
 -----------------------------------------------
 
-net.Receive("throwBomb", function(length, player)
+net.Receive("OWTA_throwBomb", function(length, player)
     if canThrowBomb(player) then throwBomb(player) end
 end)

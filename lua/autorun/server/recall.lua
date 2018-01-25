@@ -120,6 +120,6 @@ hook.Add("InitPostEntity", "createRecallHook", function()
     end)
 end)
 
-net.Receive("recall", function(length, player)
+net.Receive("OWTA_recall", function(length, player)
     if canRecall(player) then recall(player) end
 end)

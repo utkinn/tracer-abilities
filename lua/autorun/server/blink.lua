@@ -22,13 +22,13 @@ function calculateBlinkPosition(player, pitch)
     local blinkDirection = playerAngles:Forward()
 
     --Direction blinks
-    if player:KeyDown( IN_MOVELEFT ) then
+    if player:KeyDown(IN_MOVELEFT) then
         blinkDirection = -playerAngles:Right()
     end
-    if player:KeyDown( IN_MOVERIGHT ) then
+    if player:KeyDown(IN_MOVERIGHT) then
         blinkDirection = playerAngles:Right()
     end
-    if player:KeyDown( IN_BACK ) then
+    if player:KeyDown(IN_BACK) then
         blinkDirection = -playerAngles:Forward()
     end
 
@@ -115,6 +115,6 @@ function blink(player)
     player:SetNWInt("blinks", player:GetNWInt("blinks") - 1)
 end
 
-net.Receive("blink", function(length, player)
+net.Receive("OWTA_blink", function(length, player)
     if canBlink(player) then blink(player) end
 end)

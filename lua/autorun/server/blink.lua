@@ -1,6 +1,6 @@
-BLINK_LENGTH = 367    --~7 meters
+local BLINK_LENGTH = 367    --~7 meters
 
-function restoreBlinks(player)
+local function restoreBlinks(player)
     if player:GetNWInt("blinks") < GetConVar("tracer_blink_stack"):GetInt() then
         player:SetNWInt("blinks", player:GetNWInt("blinks") + 1)
         signal("blip", player)
@@ -9,13 +9,13 @@ function restoreBlinks(player)
     end
 end
 
-function emitBlinkEffect(player)
+local function emitBlinkEffect(player)
     local effectData = EffectData()
     effectData:SetEntity(player)
     util.Effect("blink", effectData)
 end
 
-function calculateBlinkPosition(player, pitch)
+local function calculateBlinkPosition(player, pitch)
     local playerAngles = player:EyeAngles()
     playerAngles.pitch = pitch
 
@@ -46,7 +46,7 @@ function calculateBlinkPosition(player, pitch)
     return tr, blinkPosition, blinkDirection
 end
 
-function executeBlink(player, position, direction)
+local function executeBlink(player, position, direction)
     local blinkAnim = {
         player:GetPos() - direction * 5,    --Rolling back for 1 frame
         player:GetPos() + direction * BLINK_LENGTH * 0.2,
@@ -88,7 +88,7 @@ local function shouldPlayCallout(player)
     return player:GetInfoNum("tracer_callouts", 0) == 1 and math.random() < 0.2
 end
 
-function blink(player)
+local function blink(player)
     emitBlinkEffect(player)
 
     if not timer.Exists("restoreBlinks_" .. player:UserID()) then

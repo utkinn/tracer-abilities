@@ -1,6 +1,6 @@
 local FONT_NAME = "BigNoodleTooOblique"
 
-function createFonts()
+local function createFonts()
     surface.CreateFont("Overwatch", {
         font = FONT_NAME,
         size = 50

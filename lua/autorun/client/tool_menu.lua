@@ -1,4 +1,4 @@
-function createBinder(form, text, onChange, initValue)
+local function createBinder(form, text, onChange, initValue)
     local label = vgui.Create("DLabel")
     label:SetText(text)
 

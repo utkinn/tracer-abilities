@@ -78,7 +78,7 @@ local function kickBomb(player, bomb)
     phys:ApplyForceCenter(player:EyeAngles():Forward() * 3000 + Vector(0, 0, 1500))
 end
 
-function throwBomb(player)
+local function throwBomb(player)
     resetCalloutOnThrow(player)
 
     local bomb = createBomb(player)

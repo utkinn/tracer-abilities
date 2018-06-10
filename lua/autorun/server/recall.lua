@@ -1,6 +1,6 @@
-snapshotTick = 0    --Number of current snapshot
+local snapshotTick = 0    --Number of current snapshot
 
-recallSnapshots = {}    --Table for storing all snapshots
+local recallSnapshots = {}    --Table for storing all snapshots
 
 local function createEffectData(player)
     local effectData = EffectData()
@@ -35,7 +35,7 @@ local function enterRecallState(player)
     player:DrawWorldModel(false)
 end
 
-function recall(player)
+local function recall(player)
     player:SetNWBool("readyForRecall", false)
 
     emitRecallEffect(player)

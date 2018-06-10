@@ -32,7 +32,7 @@ local function calculateBlinkPosition(player, pitch)
         blinkDirection = -playerAngles:Forward()
     end
 
-    blinkPosition = player:GetPos() + blinkDirection * BLINK_LENGTH
+    local blinkPosition = player:GetPos() + blinkDirection * BLINK_LENGTH
 
     local tr = util.TraceEntity({  -- Trace and Tracer...
         start = player:GetPos(),  -- [[+ Vector(0, 0, 10)]],
@@ -67,12 +67,14 @@ local function executeBlink(player, position, direction)
     end
 end
 
-local function slopeOrWall(player)
+local function slopeOrWall(player, tr)
     local currentTestedPitch = -1
+    local blinkPosition, blinkDirection
     while tr.Hit and currentTestedPitch >= -45 do
-        tr, blinkPosition = calculateBlinkPosition(player, currentTestedPitch)
+        tr, blinkPosition, blinkDirection = calculateBlinkPosition(player, currentTestedPitch)
         currentTestedPitch = currentTestedPitch - 1
     end
+    return tr, blinkPosition, blinkDirection
 end
 
 local function canBlink(player)
@@ -97,9 +99,10 @@ local function blink(player)
     end
 
     local tr, blinkPosition, blinkDirection = calculateBlinkPosition(player, 0)
+    -- local tr, blinkPosition, blinkDirection = slopeOrWall(player, tr)
 
     if tr.Hit then
-        slopeOrWall(player)
+        tr, blinkPosition, blinkDirection = slopeOrWall(player, tr)
         executeBlink(player, tr.Hit and calculateBlinkPosition(player, 0).HitPos or tr.HitPos, blinkDirection)
     else
         executeBlink(player, blinkPosition, blinkDirection)

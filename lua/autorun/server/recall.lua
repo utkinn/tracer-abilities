@@ -48,10 +48,13 @@ local function recall(player)
 
     timer.Create("recallEffect", 1.25 / (3 / TICK_RATE), 3 / TICK_RATE, function()
         i = i - 1
-        local recallData = recallSnapshots[i][player]
-        if recallData == nil then
-            return
-        end
+        
+        local snapshot = recallSnapshots[i]
+        if snapshot == nil then return end
+
+        local recallData = snapshot[player]
+        if recallData == nil then return end
+
         if player:Health() < recallData.health then
             player:SetHealth(recallData.health)
         end
@@ -76,9 +79,10 @@ local function recall(player)
         player:SetNWBool("readyForRecall", true)
         player:SetNWBool("canRecall", false)
         -- Such an ugly workaround
-        player:SetNWInt("recallRestoreTime", GetConVar("tracer_recall_cooldown"):GetInt() + 2)
+        player:SetNWInt("recallRestoreTime", GetConVar("tracer_recall_cooldown"):GetInt() - 1)
         timer.Create("recallRestore_" .. player:UserID(), 1, 0, function()
             if player:GetNWInt("recallRestoreTime") < 0 then
+                player:SetNWBool('canRecall', true)
                 timer.Remove("recallRestore_" .. player:UserID())
             end
             player:SetNWInt("recallRestoreTime", player:GetNWInt("recallRestoreTime") - 1)

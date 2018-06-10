@@ -128,7 +128,7 @@ hook.Add("HUDPaint", "drawRecallIcon", function()
         surface.SetFont("Overwatch 0.5x")
         surface.SetTextColor(255, 48, 0, TRANSPARENCY)
         surface.SetTextPos(ScrW() * 0.93, ScrH() * 0.76)
-        surface.DrawText(LocalPlayer():GetNWInt("recallRestoreTime") - 3)
+        surface.DrawText(LocalPlayer():GetNWInt("recallRestoreTime"))
     end
 end)
 

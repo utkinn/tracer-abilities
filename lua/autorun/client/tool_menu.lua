@@ -1,3 +1,5 @@
+local VERSION = '1.4.4'
+
 local function createBinder(form, text, onChange, initValue)
     local label = vgui.Create("DLabel")
     label:SetText(text)
@@ -41,6 +43,37 @@ hook.Add(
 
                     form:CheckBox("Notification blips", "tracer_notification_blips")
                     form:ControlHelp("Enable ability restore notification sound.")
+
+                    form:Help('Overwatch Tracer: Abilities v'..VERSION)
+                end
+        )
+
+        spawnmenu.AddToolMenuOption(
+                "Utilities",
+                "Tracer Abilities",
+                "tracerAbilitiesAbout",
+                "About",
+                nil,
+                nil,
+                function(form)
+                    form:Help('Overwatch Tracer: Abilities v'..VERSION)
+
+                    local workshopPageButton = vgui.Create('DButton', form)
+                    workshopPageButton:SetText('Workshop page')
+                    -- workshopPageButton:SetSize(125, 40)
+                    workshopPageButton.DoClick = function()
+                        gui.OpenURL('https://steamcommunity.com/sharedfiles/filedetails/?id=1098898034')
+                    end
+                    form:AddItem(workshopPageButton)
+
+                    local gitHubPageButton = vgui.Create('DButton', form)
+                    gitHubPageButton:SetText('Contribute on GitHub')
+                    -- gitHubPageButton:SetSize(125, 40)
+                    gitHubPageButton.DoClick = function()
+                        gui.OpenURL('https://github.com/javabird25/tracer-abilities')
+                    end
+                    form:AddItem(gitHubPageButton)
+                    -- form:AddItem(workshopPageButton, gitHubPageButton)
                 end
         )
 

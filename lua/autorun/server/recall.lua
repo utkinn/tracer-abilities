@@ -1,6 +1,6 @@
-local snapshotTick = 0    --Number of current snapshot
+local snapshotTick = 0  -- Number of current snapshot
 
-local recallSnapshots = {}    --Table for storing all snapshots
+local recallSnapshots = {}  -- Table for storing all snapshots
 
 local function createEffectData(player)
     local effectData = EffectData()
@@ -30,7 +30,7 @@ local function enterRecallState(player)
     player:SetNoTarget(true)
     player:SetRenderMode(RENDERMODE_TRANSALPHA)
     player:SetColor(Color(0, 0, 0, 0))
-    --player:Lock()
+    -- player:Lock()
     player:EmitSound(OWTA_SOUNDS.recall)
     player:DrawWorldModel(false)
 end
@@ -70,12 +70,12 @@ local function recall(player)
         player:SetNoTarget(false)
         player:SetRenderMode(RENDERMODE_NORMAL)
         player:SetColor(Color(255, 255, 255, 255))
-        --player:UnLock()
+        -- player:UnLock()
         player:DrawWorldModel(true)
         emitRecallEffect(player)
         player:SetNWBool("readyForRecall", true)
         player:SetNWBool("canRecall", false)
-        --Such an ugly workaround
+        -- Such an ugly workaround
         player:SetNWInt("recallRestoreTime", GetConVar("tracer_recall_cooldown"):GetInt() + 2)
         timer.Create("recallRestore_" .. player:UserID(), 1, 0, function()
             if player:GetNWInt("recallRestoreTime") < 0 then
@@ -90,7 +90,7 @@ local function recall(player)
         end)
     end
     timer.Simple(GetConVar("tracer_recall_cooldown"):GetInt(), function()
-        player:SetNWBool("canRecall", true)    --Regain ability after 12 seconds
+        player:SetNWBool("canRecall", true)  -- Regain ability after 12 seconds
         signal("blip", player)
     end)
 end
@@ -110,11 +110,11 @@ hook.Add("InitPostEntity", "createRecallHook", function()
                 armor = player:Armor(),
                 position = player:GetPos(),
                 angles = player:EyeAngles()
-                --primaryAmmo = player:GetAmmoCount(player:GetActiveWeapon)
+                -- primaryAmmo = player:GetAmmoCount(player:GetActiveWeapon)
             }
-            -- for i = 350, 500 do    --Removing expired snapshots
+            -- for i = 350, 500 do    -- Removing expired snapshots
             -- table.remove(recallSnapshots, snapshotTick - i)
-            -- --MsgN("removed recall snapshot at recallSnapshots[", snapshotTick - i, "]")
+            -- -- MsgN("removed recall snapshot at recallSnapshots[", snapshotTick - i, "]")
             -- end
         end
     end)

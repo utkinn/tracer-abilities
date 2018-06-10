@@ -19,4 +19,4 @@ OWTA_conVars = {
     CreateConVar("tracer_bomb_charge_multiplier", 1, conVarFlags, "Multiplier of the pulse bomb charge speed.")
 }
 
-TICK_RATE = 0.05    --Smoothness of recall.
+TICK_RATE = 0.05  -- Smoothness of recall.

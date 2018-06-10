@@ -9,7 +9,7 @@ local function createBinder(form, text, onChange, initValue)
     end
 
     function binder:SetSelectedNumber(num)
-        self.m_iSelectedNumber = num -- Preserve original functionality
+        self.m_iSelectedNumber = num  -- Preserve original functionality
         onChange(num)
     end
 
@@ -21,7 +21,7 @@ hook.Add(
     "PopulateToolMenu",
     "Populate Tracer Abilities settings",
     function()
-        --Graphic settings for players
+        -- Graphic settings for players
         spawnmenu.AddToolMenuOption(
                 "Utilities",
                 "Tracer Abilities",
@@ -64,7 +64,7 @@ hook.Add(
                 end
         )
 
-        --Graphic settings for admins
+        -- Graphic settings for admins
         spawnmenu.AddToolMenuOption("Utilities", "Tracer Abilities", "tracerAbilitiesAdmin", "Admin Settings", nil, nil,
         function(form)
             if not LocalPlayer():IsAdmin() then

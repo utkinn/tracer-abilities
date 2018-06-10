@@ -57,7 +57,7 @@ function createEffect(bomb)
     util.Effect("pulseBombLobRing", effectData)
     timer.Simple(0.5, function() util.Effect("pulseBombLobRing", effectData) end)
     timer.Simple(1, function()
-        --bomb:SetNoDraw(true)
+        -- bomb:SetNoDraw(true)
         explode(bomb)
     end)
 end

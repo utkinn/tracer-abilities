@@ -1,4 +1,4 @@
-local BLINK_LENGTH = 367    --~7 meters
+local BLINK_LENGTH = 367    -- ~7 meters
 
 local function restoreBlinks(player)
     if player:GetNWInt("blinks") < GetConVar("tracer_blink_stack"):GetInt() then
@@ -21,7 +21,7 @@ local function calculateBlinkPosition(player, pitch)
 
     local blinkDirection = playerAngles:Forward()
 
-    --Direction blinks
+    -- Direction blinks
     if player:KeyDown(IN_MOVELEFT) then
         blinkDirection = -playerAngles:Right()
     end
@@ -34,12 +34,11 @@ local function calculateBlinkPosition(player, pitch)
 
     blinkPosition = player:GetPos() + blinkDirection * BLINK_LENGTH
 
-    local tr = util.TraceEntity({    --Trace and Tracer...
-        start = player:GetPos() --[[+ Vector(0, 0, 10)--]],
-        endpos = blinkPosition --[[+ Vector(0, 0, 10)--]],
+    local tr = util.TraceEntity({  -- Trace and Tracer...
+        start = player:GetPos(),  -- [[+ Vector(0, 0, 10)]],
+        endpos = blinkPosition,  -- [[+ Vector(0, 0, 10)]],
         filter = function()
-            --Trace(r) passes through all entities
-            return false
+            return false  -- Trace(r) passes through all entities
         end
     }, player)
 
@@ -48,7 +47,7 @@ end
 
 local function executeBlink(player, position, direction)
     local blinkAnim = {
-        player:GetPos() - direction * 5,    --Rolling back for 1 frame
+        player:GetPos() - direction * 5,  -- Rolling back for 1 frame
         player:GetPos() + direction * BLINK_LENGTH * 0.2,
         player:GetPos() + direction * BLINK_LENGTH * 0.4,
         player:GetPos() + direction * BLINK_LENGTH * 0.6,
@@ -94,7 +93,7 @@ local function blink(player)
     if not timer.Exists("restoreBlinks_" .. player:UserID()) then
         timer.Create("restoreBlinks_" .. player:UserID(), GetConVar("tracer_blink_cooldown"):GetInt(), 0, function()
             restoreBlinks(player)
-        end)    --Reset a cooldown timer
+        end)  -- Reset a cooldown timer
     end
 
     local tr, blinkPosition, blinkDirection = calculateBlinkPosition(player, 0)

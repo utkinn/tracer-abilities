@@ -4,7 +4,7 @@ include('server/network_strings.lua')
 
 hook.Add("PlayerInitialSpawn", "sendConVarValues", function(player)
     local values = {}
-    for _, convar in pairs(conVars) do
+    for _, convar in pairs(OWTA_conVars) do
         table.insert(values, convar:GetInt())
     end
 

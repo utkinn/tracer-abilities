@@ -31,7 +31,7 @@ local function enterRecallState(player)
     player:SetRenderMode(RENDERMODE_TRANSALPHA)
     player:SetColor(Color(0, 0, 0, 0))
     --player:Lock()
-    player:EmitSound(sounds.recall)
+    player:EmitSound(OWTA_SOUNDS.recall)
     player:DrawWorldModel(false)
 end
 
@@ -86,7 +86,7 @@ local function recall(player)
     end)
     if player:GetInfoNum("tracer_callouts", 0) == 1 and math.random() < 0.75 then
         timer.Simple(1.5, function()
-            player:EmitSound(callouts.recall[math.random(#callouts.recall)])
+            player:EmitSound(OWTA_CALLOUTS.recall[math.random(#OWTA_CALLOUTS.recall)])
         end)
     end
     timer.Simple(GetConVar("tracer_recall_cooldown"):GetInt(), function()

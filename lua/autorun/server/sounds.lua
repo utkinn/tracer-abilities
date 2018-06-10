@@ -1,4 +1,4 @@
-sounds = {
+OWTA_SOUNDS = {
     blink = {
         [1] = Sound("blink/1.wav"),
         [2] = Sound("blink/2.wav"),
@@ -7,7 +7,7 @@ sounds = {
     recall = Sound("recall.mp3")
 }
 
-callouts = {
+OWTA_CALLOUTS = {
     blink = {
         [1] = Sound("callouts/blink/1.wav"),
         [2] = Sound("callouts/blink/2.wav")

@@ -54,13 +54,13 @@ hook.Add(
                 function(form)
                     blinkBinder = createBinder(form, "Blink", function(num)
                         updateKeyBinding("blink", num)
-                    end, tracerControls.blink)
+                    end, OWTA_tracerControls.blink)
                     recallBin = createBinder(form, "Recall", function(num)
                         updateKeyBinding("recall", num)
-                    end, tracerControls.recall)
+                    end, OWTA_tracerControls.recall)
                     bombBinder = createBinder(form, "Throw Pulse Bomb", function(num)
                         updateKeyBinding("throwBomb", num)
-                    end, tracerControls.throwBomb)
+                    end, OWTA_tracerControls.throwBomb)
                 end
         )
 

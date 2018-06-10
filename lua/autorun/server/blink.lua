@@ -97,7 +97,7 @@ local function blink(player)
         end)    --Reset a cooldown timer
     end
 
-    tr, blinkPosition, blinkDirection = calculateBlinkPosition(player, 0)
+    local tr, blinkPosition, blinkDirection = calculateBlinkPosition(player, 0)
 
     if tr.Hit then
         slopeOrWall(player)
@@ -106,10 +106,10 @@ local function blink(player)
         executeBlink(player, blinkPosition, blinkDirection)
     end
 
-    player:EmitSound(sounds.blink[math.random(#sounds.blink)])
+    player:EmitSound(OWTA_SOUNDS.blink[math.random(#OWTA_SOUNDS.blink)])
 
     if shouldPlayCallout(player) then
-        timer.Simple(0.33, function() player:EmitSound(callouts.blink[math.random(#callouts.blink)]) end)
+        timer.Simple(0.33, function() player:EmitSound(OWTA_CALLOUTS.blink[math.random(#OWTA_CALLOUTS.blink)]) end)
     end
 
     player:SetNWInt("blinks", player:GetNWInt("blinks") - 1)

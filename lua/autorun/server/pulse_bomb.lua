@@ -1,7 +1,7 @@
 -------------------- Callouts --------------------
 
 local function playOnBombChargeCallout(player)
-    player:EmitSound(callouts.pulseBomb.ready[math.random(#callouts.pulseBomb.ready)])
+    player:EmitSound(OWTA_CALLOUTS.pulseBomb.ready[math.random(#OWTA_CALLOUTS.pulseBomb.ready)])
     player:SetNWBool("ultimateNotified", true)
 end
 
@@ -30,9 +30,9 @@ local function playBombThrowCallout(player, stuckToEnemy)
 
     local sound
     if stuckToEnemy then
-        sound = callouts.pulseBomb.stuck[math.random(#callouts.pulseBomb.stuck)]
+        sound = OWTA_CALLOUTS.pulseBomb.stuck[math.random(#OWTA_CALLOUTS.pulseBomb.stuck)]
     else
-        sound = callouts.pulseBomb.notStuck[math.random(#callouts.pulseBomb.notStuck)]
+        sound = OWTA_CALLOUTS.pulseBomb.notStuck[math.random(#OWTA_CALLOUTS.pulseBomb.notStuck)]
     end
     player:EmitSound(sound)
 end

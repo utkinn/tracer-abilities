@@ -1,6 +1,6 @@
 AddCSLuaFile("tracer_abilities_shared.lua")
 include("tracer_abilities_shared.lua")
-include('server/network_strings.lua')
+include('server/owta_network_strings.lua')
 
 hook.Add("PlayerInitialSpawn", "sendConVarValues", function(player)
     local values = {}

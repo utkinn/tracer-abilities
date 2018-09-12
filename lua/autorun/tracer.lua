@@ -37,7 +37,8 @@ After a brief delay, the bomb explodes, dealing high damage to all enemies withi
             Material('tracer/blink.png', MATERIAL_PARAMETERS),
             Material('tracer/recall.png', MATERIAL_PARAMETERS)
         },
-        ultimate = Material('tracer/bomb.png', MATERIAL_PARAMETERS)
+        ultimate = Material('tracer/bomb.png', MATERIAL_PARAMETERS),
+        portrait = Material('tracer/portrait.png', MATERIAL_PARAMETERS),
     },
 
     health = 150

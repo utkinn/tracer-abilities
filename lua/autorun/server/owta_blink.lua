@@ -89,7 +89,7 @@ local function shouldPlayCallout(player)
     return player:GetInfoNum("tracer_callouts", 0) == 1 and math.random() < 0.2
 end
 
-local function blink(player)
+function blink(player)
     emitBlinkEffect(player)
 
     if not timer.Exists("restoreBlinks_" .. player:UserID()) then

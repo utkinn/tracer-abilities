@@ -35,7 +35,7 @@ local function enterRecallState(player)
     player:DrawWorldModel(false)
 end
 
-local function recall(player)
+function recall(player)
     player:SetNWBool("readyForRecall", false)
 
     emitRecallEffect(player)

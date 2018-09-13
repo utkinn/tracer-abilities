@@ -1,4 +1,4 @@
-local VERSION = '1.4.5'
+local VERSION = '1.5.0'
 
 local function createBinder(form, text, onChange, initValue)
     local label = vgui.Create("DLabel")

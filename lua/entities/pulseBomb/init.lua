@@ -45,9 +45,11 @@ function explode(bomb)
     effectData = EffectData()
     effectData:SetOrigin(bomb:GetPos())
     effectData:SetScale(5)
+    util.Effect("ManhackSparks", effectData)
+    util.Effect("StunstickImpact", effectData)
     util.Effect("cball_explode", effectData)
-    util.Effect("Explosion", effectData)
-    bomb:EmitSound("ambient/explosions/explode_" .. math.random(9) .. ".wav", 140, 75)
+    util.Effect("cball_bounce", effectData)
+    util.Effect("HelicopterMegaBomb", effectData)
     bomb:Remove()
 end
 
@@ -83,5 +85,7 @@ function ENT:PhysicsCollide(data, collidedPhysObject)
         end
 
         createEffect(self)
+
+        self:EmitSound('pulse_bomb_explosion.wav', 120, 100)
     end
 end

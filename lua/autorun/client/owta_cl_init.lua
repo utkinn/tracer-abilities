@@ -24,28 +24,3 @@ net.Receive("OWTA_replicateConVars", function()
     end
 end)
 
-hook.Add("Think", "Ability key pressed", function()
-    if LocalPlayer():IsTyping() then
-        return
-    end
-    if OWTA_tracerControls.blink ~= nil then
-        if input.IsKeyDown(OWTA_tracerControls.blink) then
-            if not blinkCastedOnce then
-                signal("OWTA_blink")
-                blinkCastedOnce = true
-            end
-        else
-            blinkCastedOnce = false
-        end
-    end
-    if OWTA_tracerControls.recall ~= nil then
-        if input.IsKeyDown(OWTA_tracerControls.recall) then
-            signal("OWTA_recall")
-        end
-    end
-    if OWTA_tracerControls.throwBomb ~= nil then
-        if input.IsKeyDown(OWTA_tracerControls.throwBomb) then
-            signal("OWTA_throwBomb")
-        end
-    end
-end)

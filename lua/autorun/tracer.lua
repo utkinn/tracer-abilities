@@ -4,14 +4,16 @@ local HERO = {
     name = 'Tracer',
 
     description = [[Toting twin pulse pistols, energy-based time bombs, and rapid-fire banter,
-Tracer is able to "blink" through space and rewind her personal timeline as she battles to right wrongs the world over.]],
+Tracer is able to "blink" through space and rewind her personal timeline as she battles
+to right wrongs the world over.]],
 
     abilities = {
         {
             name = 'Blink',
             description = [[Tracer zips horizontally through space in the direction she’s moving,
 and reappears several yards away.
-She stores up to three charges of the blink ability and generates more every few seconds.]],
+She stores up to three charges of the blink ability and generates more every
+few seconds.]],
             cooldown = 3,
             castFunction = blink
         },
@@ -26,9 +28,10 @@ ammo and position on the map to precisely where they were a few seconds before.]
 
     ultimate = {
         name = 'Pulse Bomb',
-        description = [[Tracer lobs a large bomb that adheres to any surface or unfortunate opponent it lands on.
-After a brief delay, the bomb explodes, dealing high damage to all enemies within its blast radius.]],
-        castFunction = throwBomb,
+        description = [[Tracer lobs a large bomb that adheres to any surface or unfortunate opponent it lands
+on. After a brief delay, the bomb explodes, dealing high damage to all enemies within
+its blast radius.]],
+        cast = throwBomb,
         pointsRequired = 1125
     },
 

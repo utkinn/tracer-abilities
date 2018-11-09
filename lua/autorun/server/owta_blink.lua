@@ -115,6 +115,8 @@ function blink(player)
     end
 
     player:SetNWInt("blinks", player:GetNWInt("blinks") - 1)
+
+    abilitySucceeded(player, 1)
 end
 
 net.Receive("OWTA_blink", function(length, player)

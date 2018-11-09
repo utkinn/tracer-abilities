@@ -97,6 +97,8 @@ function recall(player)
         player:SetNWBool("canRecall", true)  -- Regain ability after 12 seconds
         signal("blip", player)
     end)
+
+    abilitySucceeded(player, 2)
 end
 
 hook.Add("InitPostEntity", "createSnapshotTicker", function()
